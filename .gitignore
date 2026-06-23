@@ -1,0 +1,5 @@
+# Lokale tooling & sessie-instellingen
+.claude/
+
+# macOS
+.DS_Store

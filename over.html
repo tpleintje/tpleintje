@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Over 't Pleintje – Buurtcomité 't Pleintje</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #333;
+      background: #fff;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    :root {
+      --roze:        #e8829a;
+      --roze-licht:  #fce8ed;
+      --roze-donker: #c45e78;
+      --grijs:       #f7f7f7;
+      --tekst:       #333;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: #fff;
+      border-bottom: 2px solid var(--roze-licht);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 2rem;
+    }
+    nav .nav-logo { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; }
+    nav .nav-logo img { height: 48px; width: auto; }
+    nav ul { list-style: none; display: flex; gap: 1.5rem; }
+    nav ul a {
+      text-decoration: none;
+      color: var(--roze-donker);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+      padding-bottom: 2px;
+    }
+    nav ul a:hover { color: var(--roze); }
+    nav ul a[aria-current="page"] { border-bottom: 2px solid var(--roze-donker); }
+
+    /* ── Page header ── */
+    .page-header {
+      background: linear-gradient(135deg, var(--roze-licht) 0%, #fff 60%);
+      padding: 2.8rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid #f0d0d8;
+    }
+    .page-header .titel-rij {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+    }
+    .page-header .bloesem {
+      height: 70px;
+      width: auto;
+      border: 1px solid #f0d0d8;
+      border-radius: 6px;
+    }
+    .page-header .bloesem.links { transform: scaleX(-1); }
+    @media (max-width: 600px) {
+      .page-header .bloesem { height: 48px; }
+    }
+    .page-header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      color: var(--roze-donker);
+      font-style: italic;
+      margin-bottom: 0.4rem;
+    }
+    .page-header .tagline {
+      color: #888;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Container & secties ── */
+    .container { max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+
+    .blok {
+      padding: 1.8rem 0;
+      border-bottom: 1px solid var(--roze-licht);
+    }
+    .blok:first-child { padding-top: 0.5rem; }
+    .blok:last-child { border-bottom: none; }
+
+    .blok h2 {
+      font-size: 1.45rem;
+      color: var(--roze-donker);
+      margin-bottom: 1rem;
+    }
+    .blok h2.tweede { margin-top: 2rem; }
+    .blok p { margin-bottom: 0.8rem; color: #444; }
+    .blok p:last-child { margin-bottom: 0; }
+    .blok strong { color: var(--tekst); }
+
+    /* ── Buurtkaart ── */
+    .buurtkaart {
+      display: block;
+      width: 100%;
+      max-width: 480px;
+      margin: 0.8rem auto 1rem;
+      border-radius: 10px;
+      border: 1px solid #f0d0d8;
+    }
+
+    /* ── Info-box ── */
+    .info-box {
+      background: var(--roze-licht);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0 0.4rem;
+      font-size: 0.95rem;
+    }
+    .info-box strong { color: var(--roze-donker); display: block; margin-bottom: 0.3rem; }
+    .info-box p { margin: 0; }
+    .info-box a { color: var(--roze-donker); font-weight: 600; }
+
+    /* ── Timeline ── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 0.5rem 0;
+    }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 75px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .timeline-jaar {
+      background: var(--roze-licht);
+      color: var(--roze-donker);
+      font-weight: 700;
+      padding: 0.45rem 0.6rem;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .timeline-item p { margin: 0; }
+
+    /* ── Team ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1.2rem 1rem;
+      margin-top: 1rem;
+    }
+    .team-lid { text-align: center; }
+    .team-lid img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #f0d0d8;
+      display: block;
+    }
+    .team-lid figcaption {
+      margin-top: 0.4rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--roze-donker);
+    }
+    .team-fotorij {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    .team-fotorij.onder { margin-top: 1rem; }
+    .team-fotorij .team-lid { width: 100px; }
+    .rollen {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .rollen p { margin-bottom: 0.4rem; }
+    .rollen strong { color: var(--roze-donker); }
+
+    /* ── Partners ── */
+    .partner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .partner-card {
+      background: #fff;
+      border: 1px solid #f0d0d8;
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .partner-card h3 {
+      color: var(--roze-donker);
+      margin-bottom: 0.4rem;
+      font-size: 1rem;
+    }
+    .partner-card p { font-size: 0.9rem; color: #555; margin: 0; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--roze-donker);
+      color: #fff;
+      text-align: center;
+      padding: 1.2rem;
+      font-size: 0.85rem;
+    }
+    footer a { color: #fce8ed; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      nav { padding: 0.6rem 1rem; }
+      nav ul { gap: 0.8rem; }
+      nav ul a { font-size: 0.8rem; }
+      .timeline-item { grid-template-columns: 65px 1fr; gap: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigatie ── -->
+<nav>
+  <a href="index.html#top" class="nav-logo">
+    <img src="images/logo.png" alt="'t Pleintje logo" />
+  </a>
+  <ul>
+    <li><a href="over.html" aria-current="page">Over ons</a></li>
+    <li><a href="index.html#vast">Activiteiten</a></li>
+    <li><a href="index.html#kalender">Kalender</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ── Header ── -->
+<header class="page-header">
+  <div class="titel-rij">
+    <img class="bloesem links" src="images/tak-kerselaar.jpg" alt="" aria-hidden="true" />
+    <h1>Over 't Pleintje</h1>
+    <img class="bloesem" src="images/tak-kerselaar.jpg" alt="" aria-hidden="true" />
+  </div>
+  <p class="tagline">Een warm buurtcomité in Sint-Andries</p>
+</header>
+
+<main class="container">
+
+  <!-- ── Welkom ── -->
+  <section class="blok" id="welkom">
+    <h2>Welkom</h2>
+    <p>Vind je het ook fijn om je buren te leren kennen? Om samen te leren, te spelen, te sporten, te eten, te drinken, en vooral plezier te maken…?</p>
+    <p>Dan ben je aan het juiste adres: <strong>Buurthuis 't Pleintje</strong>. Het is gelegen op het kruispunt van de Sint-Baafsstraat en de Diksmuidse Heerweg.</p>
+    <p>Van <strong>0 tot 110 jaar</strong> — jullie zijn welkom!</p>
+  </section>
+
+  <!-- ── Onze buurt ── -->
+  <section class="blok" id="buurt">
+    <h2>Onze buurt</h2>
+    <p>We bedelen nieuwsbrieven in dit gebied:</p>
+    <img class="buurtkaart" src="images/buurtkaart.jpg" alt="Kaart van onze buurt met de afbakening: Jonkheer Paul Coppietersdreef, Manitobalaan, Gistelse Steenweg (onpare kant), Squart Kardinaal Cardijnstraat en Torhoutse Steenweg (pare kant)" />
+    <p>Woon je iets verder in de buurt? Je bent <strong>ook welkom</strong>.</p>
+
+    <div class="info-box">
+      <strong>📩 Digitale nieuwsbrief</strong>
+      <p>Wil je het nieuws digitaal ontvangen? Stuur een mailtje naar <a href="mailto:buurtcomite.tpleintje@gmail.com?subject=Digitale nieuwsbrief">buurtcomite.tpleintje@gmail.com</a> met vermelding <em>'digitale nieuwsbrief'</em>.</p>
+    </div>
+  </section>
+
+  <!-- ── Geschiedenis ── -->
+  <section class="blok" id="geschiedenis">
+    <h2>Geschiedenis</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-jaar">1968</div>
+        <div>
+          <p>Het buurtpaviljoen wordt gebouwd als <strong>'Kaarterspaviljoen'</strong>. Het beheer valt onder OCMW – Mintus Brugge.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-jaar">2022</div>
+        <div>
+          <p>Bij buurtbijeenkomsten inspireert het vaak ongebruikte Paviljoentje tot <strong>nieuwe ideeën</strong> en mogelijke initiatieven.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-jaar">2023</div>
+        <div>
+          <p>Oprichting van <strong>Buurtcomité 't Pleintje</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Over ons ── -->
+  <section class="blok" id="overons">
+    <h2>Over ons</h2>
+    <p>We zijn een groep enthousiaste mensen die van 't Pleintje een leuke ontmoetingsplek willen maken voor de buurt.</p>
+    <p>Met het Buurtcomité willen we een buurthuis creëren waar iedereen elkaar kan vinden voor <strong>ontspannende, verbindende en duidende</strong> activiteiten. We stimuleren initiatieven uit de buurt, met respect voor de rust van de onmiddellijke buren.</p>
+    <p>Heb je zin om mee te helpen? <a href="mailto:buurtcomite.tpleintje@gmail.com" style="color: var(--roze-donker); font-weight: 600;">Stuur ons een mailtje!</a></p>
+
+    <div class="info-box">
+      <strong>👥 Het buurtcomité</strong>
+      <div class="team-grid">
+        <figure class="team-lid"><img src="images/team/anneke.jpg" alt="Anneke" /><figcaption>Anneke</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/annemie.jpg" alt="Annemie" /><figcaption>Annemie</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/bertje.jpg" alt="Bertje" /><figcaption>Bertje</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/ivan.jpg" alt="Ivan" /><figcaption>Ivan</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/kaat.jpg" alt="Kaat" /><figcaption>Kaat</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/nele.jpg" alt="Nele" /><figcaption>Nele</figcaption></figure>
+      </div>
+
+      <div class="rollen">
+        <p><strong>Onthaal:</strong> Anneke, Bertje, Charlotte, Greet en Kaat</p>
+        <p><strong>Sport:</strong> Anneke, Ivan, Kristof (lopen) en Mony</p>
+        <p><strong>Extra:</strong> Abdel, Bruno, Gilles, Helena, Inge, Jan, Koen, Lieve, Lotje en Pieter</p>
+      </div>
+
+      <div class="team-fotorij">
+        <figure class="team-lid"><img src="images/team/greet.jpg" alt="Greet" /><figcaption>Greet</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/charlotte.jpg" alt="Charlotte" /><figcaption>Charlotte</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/kristof.jpg" alt="Kristof" /><figcaption>Kristof</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/mony.jpg" alt="Mony" /><figcaption>Mony</figcaption></figure>
+      </div>
+
+      <div class="team-fotorij onder">
+        <figure class="team-lid"><img src="images/team/abdel.jpg" alt="Abdel" /><figcaption>Abdel</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/koen.jpg" alt="Koen" /><figcaption>Koen</figcaption></figure>
+        <figure class="team-lid"><img src="images/team/gilles.jpg" alt="Gilles" /><figcaption>Gilles</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Buurthuis & partners ── -->
+  <section class="blok" id="buurthuis">
+    <h2>Het buurthuis</h2>
+    <p>Het buurthuis is <strong>eigendom van Mintus</strong>. Er kunnen geen privéfeestjes gehouden worden — op activiteiten worden alle buurtbewoners uitgenodigd.</p>
+    <p>Heb je een tof idee dat je wil uitwerken voor de buurt? <a href="mailto:buurtcomite.tpleintje@gmail.com" style="color: var(--roze-donker); font-weight: 600;">Laat het ons weten.</a></p>
+
+    <h2 class="tweede">Partners</h2>
+    <div class="partner-grid">
+      <div class="partner-card">
+        <h3>Mintus</h3>
+        <p>Gebruik van de locatie, aanbod activiteiten en logistieke ondersteuning.</p>
+      </div>
+      <div class="partner-card">
+        <h3>Stad Brugge – Brugse Buurten</h3>
+        <p>Aanbod activiteiten en buurtcheques.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2026 Buurtcomité 't Pleintje · Sint-Baafsstraat, 8200 Sint-Andries ·
+  <a href="mailto:buurtcomite.tpleintje@gmail.com">buurtcomite.tpleintje@gmail.com</a></p>
+</footer>
+
+</body>
+</html>

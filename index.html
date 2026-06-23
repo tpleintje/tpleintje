@@ -68,10 +68,26 @@
       padding: 4rem 1.5rem 3rem;
       border-bottom: 1px solid #f0d0d8;
     }
+    .hero .logo-rij {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+    .hero .bloesem {
+      height: 110px;
+      width: auto;
+      border: 1px solid #f0d0d8;
+      border-radius: 6px;
+    }
+    .hero .bloesem.links { transform: scaleX(-1); }
+    @media (max-width: 600px) {
+      .hero .bloesem { height: 70px; }
+    }
     .hero img.hero-logo {
       height: 120px;
       width: auto;
-      margin-bottom: 1.2rem;
     }
     .hero h1 {
       font-size: 2.4rem;
@@ -104,23 +120,44 @@
       border-bottom: 2px solid var(--roze-licht);
     }
 
-    /* ── Over ons ── */
-    .over-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-    .over-card {
-      background: #fff;
+    /* ── Over: subsecties ── */
+    .over-sub { margin-bottom: 2.5rem; }
+    .over-sub p { margin-bottom: 0.6rem; color: #444; }
+    .buurtkaart {
+      display: block;
+      width: 100%;
+      max-width: 480px;
+      margin: 0.8rem auto 1rem;
+      border-radius: 10px;
       border: 1px solid #f0d0d8;
-      border-radius: 12px;
-      padding: 1.3rem 1.2rem;
-      text-align: center;
     }
-    .over-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .over-card h3 { color: var(--roze-donker); margin-bottom: 0.4rem; font-size: 1rem; }
-    .over-card p { font-size: 0.9rem; color: #555; }
+    .info-box {
+      background: var(--roze-licht);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    .info-box strong { color: var(--roze-donker); display: block; margin-bottom: 0.3rem; }
+    .info-box p { margin: 0; }
+    .info-box a { color: var(--roze-donker); font-weight: 600; }
+    .timeline { display: flex; flex-direction: column; gap: 0.8rem; margin: 0.5rem 0; }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 75px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .timeline-jaar {
+      background: var(--roze-licht);
+      color: var(--roze-donker);
+      font-weight: 700;
+      padding: 0.45rem 0.6rem;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .timeline-item p { margin: 0; }
 
     /* ── Vaste activiteiten ── */
     .vast-grid {
@@ -230,6 +267,7 @@
       .hero h1 { font-size: 1.8rem; }
       .event { grid-template-columns: 70px 1fr; }
       .event .prijs { grid-column: 2; }
+      .timeline-item { grid-template-columns: 65px 1fr; gap: 0.7rem; }
     }
   </style>
 </head>
@@ -241,7 +279,7 @@
     <img src="images/logo.png" alt="'t Pleintje logo" />
   </a>
   <ul>
-    <li><a href="#over">Over ons</a></li>
+    <li><a href="over.html">Over ons</a></li>
     <li><a href="#vast">Activiteiten</a></li>
     <li><a href="#kalender">Kalender</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -250,7 +288,11 @@
 
 <!-- ── Hero ── -->
 <header class="hero" id="top">
-  <img class="hero-logo" src="images/logo.png" alt="'t Pleintje" />
+  <div class="logo-rij">
+    <img class="bloesem links" src="images/tak-kerselaar.jpg" alt="" aria-hidden="true" />
+    <img class="hero-logo" src="images/logo.png" alt="'t Pleintje" />
+    <img class="bloesem" src="images/tak-kerselaar.jpg" alt="" aria-hidden="true" />
+  </div>
   <h1>'t Pleintje</h1>
   <p class="tagline">Brengt samen</p>
   <p>Een warm buurtcomité in de Sint-Baafsstraat, 8200 Sint-Andries.<br>
@@ -260,26 +302,53 @@
 <!-- ── Over ons ── -->
 <section id="over">
   <div class="container">
-    <h2>Over ons</h2>
-    <p>Buurtcomité 't Pleintje brengt buren samen met een gevarieerd aanbod van activiteiten: van gezellige filmavonden en fietstochten tot EHBO-cursussen en pannenkoeken. Alles gaat door in of vertrekt vanuit <strong>Buurthuis 't Pleintje</strong> in de Sint-Baafsstraat.<sup>*</sup></p>
-    <p style="margin-top:0.75rem;font-size:0.85rem;color:#888;font-style:italic;"><sup>*</sup> Films en voorstellingen gaan door op een andere locatie. Raadpleeg het specifieke evenement voor meer info.</p>
-    <div class="over-grid" style="margin-top:1.5rem">
-      <div class="over-card">
-        <div class="icon">🏠</div>
-        <h3>Ontmoetingsplaats</h3>
-        <p>Het buurthuis is een thuis voor iedereen uit de buurt — voor een babbel, een activiteit of gewoon een koffie.</p>
-      </div>
-      <div class="over-card">
-        <div class="icon">🤝</div>
-        <h3>Vrijwilligers</h3>
-        <p>We zijn een enthousiast buurtcomité van vrijwilligers. Zin om mee te doen? Stuur ons een mailtje!</p>
-      </div>
-      <div class="over-card">
-        <div class="icon">🌸</div>
-        <h3>Voor iedereen</h3>
-        <p>Jong en oud, uit de buurt — bij 't Pleintje ben je altijd welkom. Inschrijven is niet altijd nodig.</p>
+    <div class="over-sub">
+      <h2>Welkom</h2>
+      <p>Vind je het ook fijn om je buren te leren kennen? Om samen te leren, te spelen, te sporten, te eten, te drinken, en vooral plezier te maken…?</p>
+      <p>Dan ben je aan het juiste adres: <strong>Buurthuis 't Pleintje</strong>. Het is gelegen op het kruispunt van de Sint-Baafsstraat en de Diksmuidse Heerweg.</p>
+      <p>Van <strong>0 tot 110 jaar</strong> — jullie zijn welkom!</p>
+    </div>
+
+    <div class="over-sub">
+      <h2>Onze buurt</h2>
+      <p>We bedelen nieuwsbrieven in dit gebied:</p>
+      <img class="buurtkaart" src="images/buurtkaart.jpg" alt="Kaart van onze buurt met de afbakening: Jonkheer Paul Coppietersdreef, Manitobalaan, Gistelse Steenweg (onpare kant), Squart Kardinaal Cardijnstraat en Torhoutse Steenweg (pare kant)" />
+      <p>Woon je iets verder in de buurt? Je bent <strong>ook welkom</strong>.</p>
+      <div class="info-box">
+        <strong>📩 Digitale nieuwsbrief</strong>
+        <p>Wil je het nieuws digitaal ontvangen? Stuur een mailtje naar <a href="mailto:buurtcomite.tpleintje@gmail.com?subject=Digitale nieuwsbrief">buurtcomite.tpleintje@gmail.com</a> met vermelding <em>'digitale nieuwsbrief'</em>.</p>
       </div>
     </div>
+
+    <div class="over-sub">
+      <h2>Geschiedenis</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-jaar">1968</div>
+          <div>
+            <p>Het buurtpaviljoen wordt gebouwd als <strong>'Kaarterspaviljoen'</strong>. Het beheer valt onder OCMW – Mintus Brugge.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-jaar">2022</div>
+          <div>
+            <p>Bij buurtbijeenkomsten inspireert het vaak ongebruikte Paviljoentje tot <strong>nieuwe ideeën</strong> en mogelijke initiatieven.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-jaar">2023</div>
+          <div>
+            <p>Oprichting van <strong>Buurtcomité 't Pleintje</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:1.5rem">
+      <a href="over.html" style="display:inline-block;color:var(--roze-donker);font-weight:600;text-decoration:none;font-size:0.95rem;border-bottom:2px solid var(--roze-licht);padding-bottom:2px">
+        Meer over het buurthuis, ons team en onze partners →
+      </a>
+    </p>
   </div>
 </section>
 
@@ -291,10 +360,6 @@
       <div class="vast-item">
         <h3>🃏 Kaarten, Rummikub, Triominos…</h3>
         <p>Elke <strong>maandag van 14u tot 17u</strong> in het buurthuis. Gratis, geen inschrijving nodig. Gewoon binnenstappen!</p>
-      </div>
-      <div class="vast-item">
-        <h3>🧶 Breien &amp; haken met Babbelsteken</h3>
-        <p>Elke <strong>dinsdag van 14u tot 17u</strong> in het buurthuis. Kom zoals je bent, met of zonder handwerk.</p>
       </div>
       <div class="vast-item">
         <h3>🏃 Loopclub 't Pleintje</h3>
@@ -452,6 +517,10 @@
         <div>
           <h3>Adres</h3>
           <p>Buurthuis 't Pleintje<br>Sint-Baafsstraat<br>8200 Sint-Andries</p>
+          <p style="margin-top:0.5rem;font-size:0.85rem;color:#666">
+            Elke <strong>maandag 14u–17u</strong> aanwezig.<br>
+            Brievenbus voor inschrijvingen, ideeën &amp; vragen.
+          </p>
         </div>
       </div>
       <div class="contact-item">
