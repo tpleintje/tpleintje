@@ -36,6 +36,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("admin");
 
   eleventyConfig.addGlobalData("categorieen", CATEGORIEEN);
+  // Huidig jaar bij elke build (voor de footer-copyright).
+  eleventyConfig.addGlobalData("huidigJaar", () => new Date().getFullYear());
 
   // ── Datum-filters (Nederlands) ──
   eleventyConfig.addFilter("weekdag", (date) => WEEKDAGEN[d(date).getUTCDay()]);

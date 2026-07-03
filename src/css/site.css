@@ -211,10 +211,12 @@ h2 {
 .vast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
 .vast-item {
   background: #fff;
-  border-left: 4px solid var(--roze);
-  border-radius: 0 8px 8px 0;
-  padding: 1rem 1.2rem;
+  border: 1px solid #f0d0d8;
+  border-radius: 10px;
+  overflow: hidden;
 }
+.vast-foto { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+.vast-body { padding: 1rem 1.2rem; border-left: 4px solid var(--roze); }
 .vast-item h3 { color: var(--roze-donker); font-size: 1rem; margin-bottom: 0.3rem; }
 .vast-item p { font-size: 0.88rem; color: #555; }
 

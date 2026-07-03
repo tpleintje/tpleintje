@@ -66,12 +66,18 @@ title: "Buurtcomité 't Pleintje – Sint-Baafsstraat, 8200 Sint-Andries"
     <h2>Vaste activiteiten</h2>
     <div class="vast-grid">
       <div class="vast-item">
-        <h3>🃏 Kaarten, Rummikub, Triominos…</h3>
-        <p>Elke <strong>maandag van 14u tot 17u</strong> in het buurthuis. Gratis, geen inschrijving nodig. Gewoon binnenstappen!</p>
+        <img class="vast-foto" src="/images/fotos/kaarten.jpg" alt="Buurtbewoners kaarten samen in het buurthuis" />
+        <div class="vast-body">
+          <h3>🃏 Kaarten, Rummikub, Triominos…</h3>
+          <p>Elke <strong>maandag van 14u tot 17u</strong> in het buurthuis. Gratis, geen inschrijving nodig. Gewoon binnenstappen!</p>
+        </div>
       </div>
       <div class="vast-item">
-        <h3>🏃 Loopclub 't Pleintje</h3>
-        <p>Elke <strong>zondag om 9u stipt</strong> — 5 en/of 10 km lopen. Vertrek aan het buurthuis. Interesse? Contacteer ons voor de WhatsApp-groep.</p>
+        <img class="vast-foto" src="/images/fotos/loopclub.jpg" alt="De lopers van Loopclub 't Pleintje aan het buurthuis" />
+        <div class="vast-body">
+          <h3>🏃 Loopclub 't Pleintje</h3>
+          <p>Elke <strong>zondag om 9u stipt</strong> — 5 en/of 10 km lopen. Vertrek aan het buurthuis. Interesse? Contacteer ons voor de WhatsApp-groep.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -79,7 +85,7 @@ title: "Buurtcomité 't Pleintje – Sint-Baafsstraat, 8200 Sint-Andries"
 
 <section id="kalender">
   <div class="container">
-    <h2>Kalender {{ site.jaar }}</h2>
+    <h2>Komende activiteiten</h2>
     <div class="kalender-lijst">
       {% for ev in collections.komende %}
       <a class="event{% if ev.data.status == 'geannuleerd' %} is-geannuleerd{% endif %}" href="{{ ev.url }}">

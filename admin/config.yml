@@ -17,6 +17,7 @@ collections:
     description: "Beheer hier de activiteiten die op de kalender verschijnen."
     folder: "src/events"
     create: true
+    identifier_field: titel
     slug: "{{slug}}"
     extension: "md"
     format: "frontmatter"
