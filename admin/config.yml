@@ -1,8 +1,11 @@
+# TESTFASE: geen login. De admin opent in demo-modus zodat je het CMS kan
+# uitproberen (events aanmaken/bewerken/bekijken). Let op: wijzigingen worden
+# hier NIET bewaard — het is een sandbox.
+# Later vervangen door een echte backend (git-gateway/Netlify Identity of GitHub).
 backend:
-  name: git-gateway
-  branch: main
+  name: test-repo
 
-# Maakt lokaal testen mogelijk via: npx decap-server
+# Maakt lokaal testen MET opslaan mogelijk via: npx decap-server
 local_backend: true
 
 media_folder: "images/events"
