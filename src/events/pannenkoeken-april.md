@@ -1,7 +1,7 @@
 ---
 titel: Pannenkoeken, koffie & babbel
 categorie: buurtactiviteit
-datum: 2026-10-22
+datum: 2026-11-26
 aanvang: 14u30
 einduur: 17u00
 locatie_naam: Buurthuis 't Pleintje, Sint-Baafsstraat
