@@ -5,7 +5,7 @@ datum: 2026-07-30
 aanvang: 19u
 einduur: 22u
 locatie_naam: Violierstraat 7 8000 Brugge
-prijs: "2"
+prijs: € 2
 status: volzet
 inschrijving: false
 inschrijving_binnenkort: false
