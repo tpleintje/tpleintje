@@ -1,9 +1,11 @@
-# Login via Netlify Identity + Git Gateway (één gedeelde gebruiker voor het bestuur).
+# GitHub-backend, passwordless via de Cloudflare Worker (testfase).
 backend:
-  name: git-gateway
+  name: github
+  repo: BrunBaek/tpleintje
   branch: main
+  base_url: https://tpleintje-cms.tpleintje.workers.dev
 
-# Lokaal testen zonder login blijft mogelijk via: npx decap-server
+# Lokaal testen blijft mogelijk via: npx decap-server
 local_backend: true
 
 media_folder: "images/events"
