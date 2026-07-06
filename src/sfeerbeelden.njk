@@ -1,0 +1,60 @@
+---
+layout: base.njk
+pagina: sfeerbeelden
+title: "Sfeerbeelden – Buurtcomité 't Pleintje"
+permalink: /sfeerbeelden/
+---
+
+<header class="page-header">
+  <div class="titel-rij">
+    <img class="bloesem links" src="/images/tak-kerselaar.jpg" alt="" aria-hidden="true" />
+    <h1>Sfeerbeelden</h1>
+    <img class="bloesem" src="/images/tak-kerselaar.jpg" alt="" aria-hidden="true" />
+  </div>
+  <p class="tagline">Beelden van het buurthuisleven</p>
+</header>
+
+<main class="tekst-container">
+  {% if sfeerbeelden.fotos and sfeerbeelden.fotos.length %}
+  <div class="galerij-raster">
+    {% for f in sfeerbeelden.fotos %}
+    <button class="galerij-item" type="button" data-groot="{{ f.foto | url }}" data-bijschrift="{{ f.bijschrift }}">
+      <img src="{{ f.foto }}" alt="{{ f.bijschrift or 'Sfeerbeeld' }}" loading="lazy" />
+    </button>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="lege-kalender">Er staan nog geen sfeerbeelden. Kom binnenkort terug!</p>
+  {% endif %}
+</main>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-sluit" type="button" aria-label="Sluiten">✕</button>
+  <figure>
+    <img id="lightbox-img" src="" alt="" />
+    <figcaption id="lightbox-cap"></figcaption>
+  </figure>
+</div>
+
+<script>
+  (function () {
+    var box = document.getElementById('lightbox');
+    if (!box) return;
+    var img = document.getElementById('lightbox-img');
+    var cap = document.getElementById('lightbox-cap');
+    function open(b) {
+      img.setAttribute('src', b.getAttribute('data-groot'));
+      var c = b.getAttribute('data-bijschrift') || '';
+      cap.textContent = c;
+      img.setAttribute('alt', c || 'Sfeerbeeld');
+      box.hidden = false;
+    }
+    function sluit() { box.hidden = true; img.setAttribute('src', ''); }
+    [].forEach.call(document.querySelectorAll('.galerij-item'), function (b) {
+      b.addEventListener('click', function () { open(b); });
+    });
+    box.querySelector('.lightbox-sluit').addEventListener('click', sluit);
+    box.addEventListener('click', function (e) { if (e.target === box) sluit(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') sluit(); });
+  })();
+</script>

@@ -14,6 +14,25 @@ public_folder: "/images/events"
 locale: "nl"
 
 collections:
+  - name: "sfeerbeelden"
+    label: "Sfeerbeelden (foto's)"
+    files:
+      - name: "galerij"
+        label: "Fotogalerij"
+        file: "src/_data/sfeerbeelden.json"
+        description: "Foto's van het buurthuisleven voor de pagina 'Foto's'. Sleep om de volgorde te wijzigen."
+        media_folder: "/images/sfeer"
+        public_folder: "/images/sfeer"
+        fields:
+          - label: "Foto's"
+            name: "fotos"
+            label_singular: "Foto"
+            widget: "list"
+            summary: "{{fields.bijschrift}}"
+            fields:
+              - { label: "Foto", name: "foto", widget: "image" }
+              - { label: "Bijschrift", name: "bijschrift", widget: "string", required: false }
+
   - name: "events"
     label: "Activiteiten"
     label_singular: "Activiteit"

@@ -1,0 +1,8 @@
+{
+  "fotos": [
+    { "foto": "/images/fotos/maandag.jpg", "bijschrift": "Maandagnamiddag: kaarten, Rummikub en een babbel" },
+    { "foto": "/images/fotos/kaarten.jpg", "bijschrift": "Kaarten in het buurthuis" },
+    { "foto": "/images/fotos/rummikub.jpg", "bijschrift": "Rummikub met de buren" },
+    { "foto": "/images/fotos/loopclub.jpg", "bijschrift": "Loopclub 't Pleintje" }
+  ]
+}
