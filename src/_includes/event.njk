@@ -133,15 +133,14 @@
     {% if inschrijving_deadline %}<p><strong>Deadline:</strong> inschrijven en betalen vóór <strong>{{ inschrijving_deadline }}</strong>.</p>{% endif %}
     {% if mail_extra %}<p>{{ mail_extra | safe }}</p>{% endif %}
 
-    <form class="inschrijf-form" action="https://api.web3forms.com/submit" method="POST">
-      <input type="hidden" name="access_key" value="7f91d7cd-cdec-4ce0-8b48-e62324977e26" />
-      <input type="hidden" name="subject" value="Inschrijving: {{ titel }}" />
-      <input type="hidden" name="from_name" value="Inschrijving 't Pleintje" />
-      <input type="hidden" name="Activiteit" value="{{ titel }}{% if datum %} ({{ datum | datumLang }}){% endif %}" />
-      <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" />
+    <form class="inschrijf-form" action="{{ site.inschrijfEndpoint }}" method="POST">
+      <input type="hidden" name="Activiteit" value="{{ titel }}" />
+      <input type="hidden" name="Datum" value="{{ datum | datumLang }}{% if einddatum %} – {{ einddatum | datumLang }}{% endif %}" />
+      <input type="hidden" name="Prijs" value="{{ prijs }}" />
+      <input type="hidden" name="Betaling" value="{% if '€' in prijs %}ja{% else %}nee{% endif %}" />
       <label>Naam<input type="text" name="Naam" required /></label>
       <label>E-mail<input type="email" name="email" required /></label>
-      <label>Aantal personen<input type="number" name="Aantal personen" value="1" min="1" /></label>
+      <label>Aantal personen<input type="number" name="Aantal" value="1" min="1" /></label>
       <label>Opmerking (optioneel)<textarea name="Opmerking" rows="3"></textarea></label>
       <button type="submit" class="btn-inschrijf">Inschrijven</button>
       <p class="inschrijf-status" role="status" aria-live="polite"></p>
@@ -179,18 +178,13 @@
       e.preventDefault();
       status.className = 'inschrijf-status';
       status.textContent = 'Bezig met verzenden…';
-      fetch('https://api.web3forms.com/submit', { method: 'POST', body: new FormData(form) })
-        .then(function (r) { return r.json(); })
-        .then(function (json) {
-          if (json.success) {
-            form.reset();
-            var btn = form.querySelector('button'); if (btn) { btn.disabled = true; }
-            status.className = 'inschrijf-status ok';
-            status.textContent = '✅ Bedankt! Je inschrijving is verzonden. We nemen contact met je op.';
-          } else {
-            status.className = 'inschrijf-status fout';
-            status.textContent = 'Er ging iets mis. Probeer opnieuw of mail ons rechtstreeks.';
-          }
+      var data = new URLSearchParams(new FormData(form));
+      fetch(form.action, { method: 'POST', mode: 'no-cors', body: data })
+        .then(function () {
+          form.reset();
+          var btn = form.querySelector('button'); if (btn) { btn.disabled = true; }
+          status.className = 'inschrijf-status ok';
+          status.textContent = '✅ Bedankt! Je inschrijving is verzonden. Je krijgt een bevestiging per e-mail.';
         })
         .catch(function () {
           status.className = 'inschrijf-status fout';
