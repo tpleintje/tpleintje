@@ -87,6 +87,13 @@ module.exports = function (eleventyConfig) {
       .sort((a, b) => new Date(b.data.datum) - new Date(a.data.datum))
   );
 
+  // Activiteit die met een foto bovenaan de startpagina uitgelicht wordt (CMS-vinkje).
+  eleventyConfig.addCollection("uitgelicht", (api) =>
+    api.getFilteredByTag("event")
+      .filter((ev) => ev.data.uitgelicht && einde(ev) >= vandaag())
+      .sort((a, b) => new Date(a.data.datum) - new Date(b.data.datum))
+  );
+
   return {
     // Netlify serveert vanaf de wortel; GitHub Pages vanaf /tpleintje/.
     // Netlify zet altijd NETLIFY=true in de build-omgeving.

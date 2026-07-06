@@ -1,5 +1,6 @@
 ---
 titel: Magisch buurtfeest
+uitgelicht: true
 categorie: buurtactiviteit
 datum: 2026-08-30
 aanvang: 12u

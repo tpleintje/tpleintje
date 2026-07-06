@@ -16,6 +16,24 @@ title: "Buurtcomité 't Pleintje – Sint-Baafsstraat, 8200 Sint-Andries"
   Voor en door de buurt — iedereen is welkom!</p>
 </header>
 
+{% set ev = collections.uitgelicht[0] %}
+{% if ev %}
+<section class="uitgelicht-sectie">
+  <div class="container uitgelicht-kaart">
+    {% if ev.data.foto %}
+    <img class="uitgelicht-foto" src="{{ ev.data.foto }}" alt="{{ ev.data.foto_bijschrift or ev.data.titel }}" />
+    {% endif %}
+    <div class="uitgelicht-body">
+      <span class="uitgelicht-badge">✨ Uitgelicht</span>
+      <p class="uitgelicht-datum">{{ ev.data.datum | datumGroot(ev.data.einddatum) }}</p>
+      <h2><a href="{{ ev.url }}">{{ ev.data.titel }}</a></h2>
+      <p class="uitgelicht-details">{{ ev.data.aanvang }}{% if ev.data.einduur %} – {{ ev.data.einduur }}{% endif %}{% if ev.data.locatie_naam %} &middot; {{ ev.data.locatie_naam }}{% endif %}</p>
+      <a class="uitgelicht-cta" href="{{ ev.url }}">Meer info &amp; inschrijven →</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section id="over">
   <div class="container">
     <div class="over-sub">

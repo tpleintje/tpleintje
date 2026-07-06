@@ -54,6 +54,7 @@ collections:
     sortable_fields: ["datum", "titel"]
     fields:
       - { label: "Titel", name: "titel", widget: "string" }
+      - { label: "Uitgelicht op startpagina", name: "uitgelicht", widget: "boolean", default: false, required: false, hint: "Toont deze activiteit met foto bovenaan de startpagina. Zet dit maar bij één activiteit tegelijk aan." }
       - label: "Categorie"
         name: "categorie"
         widget: "select"
