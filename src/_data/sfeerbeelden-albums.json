@@ -15,6 +15,15 @@
       "foto_bijschriften": [
         { "bestandsnaam": "loopclub.jpg", "bijschrift": "Klaar voor de start" }
       ]
+    },
+    {
+      "map": "mooimakers",
+      "titel": "Mooimakers – Zwerfvuil ruimen",
+      "bijschrift": "Buren ruimen samen zwerfvuil op in de buurt"
+    },
+    {
+      "map": "nieuwjaarsdrink",
+      "titel": "Nieuwjaarsdrink"
     }
   ]
 }
