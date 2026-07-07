@@ -1,0 +1,20 @@
+{
+  "albums": [
+    {
+      "map": "maandagnamiddag",
+      "titel": "Maandagnamiddag",
+      "foto_bijschriften": [
+        { "bestandsnaam": "maandag.jpg", "bijschrift": "Kaarten, Rummikub en een babbel" },
+        { "bestandsnaam": "kaarten.jpg", "bijschrift": "Kaarten in het buurthuis" },
+        { "bestandsnaam": "rummikub.jpg", "bijschrift": "Rummikub met de buren" }
+      ]
+    },
+    {
+      "map": "loopclub",
+      "titel": "Loopclub 't Pleintje",
+      "foto_bijschriften": [
+        { "bestandsnaam": "loopclub.jpg", "bijschrift": "Klaar voor de start" }
+      ]
+    }
+  ]
+}

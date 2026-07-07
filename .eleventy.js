@@ -24,7 +24,55 @@ function einde(ev) {
   return ev.data.einddatum ? new Date(ev.data.einddatum) : new Date(ev.data.datum);
 }
 
+const fs = require("fs");
+const path = require("path");
 const { EleventyHtmlBasePlugin } = require("@11ty/eleventy");
+
+// ── Sfeerbeelden: albums = submappen van images/sfeer/, foto's = bestanden erin.
+// Nieuwe foto's uploaden = gewoon in de juiste (of een nieuwe) map droppen, geen
+// CMS-invoer per foto nodig. sfeerbeelden-albums.json bevat enkel optionele titel-
+// en bijschriftoverrides, beheerd via het CMS.
+const SFEER_MAP = path.join(__dirname, "images", "sfeer");
+const AFBEELDING_EXTENSIES = [".jpg", ".jpeg", ".png", ".webp"];
+
+function sfeerbeeldenData() {
+  let metaData = {};
+  try {
+    delete require.cache[require.resolve("./src/_data/sfeerbeelden-albums.json")];
+    metaData = require("./src/_data/sfeerbeelden-albums.json");
+  } catch (e) { /* nog geen metadata-bestand */ }
+
+  const metaPerMap = {};
+  (metaData.albums || []).forEach((a) => { metaPerMap[a.map] = a; });
+
+  let mappen = [];
+  try {
+    mappen = fs.readdirSync(SFEER_MAP, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name)
+      .sort();
+  } catch (e) { /* images/sfeer bestaat nog niet */ }
+
+  const albums = mappen.map((mapnaam) => {
+    const meta = metaPerMap[mapnaam] || {};
+    const bijschriftPerBestand = {};
+    (meta.foto_bijschriften || []).forEach((f) => { bijschriftPerBestand[f.bestandsnaam] = f.bijschrift; });
+
+    const bestanden = fs.readdirSync(path.join(SFEER_MAP, mapnaam))
+      .filter((f) => AFBEELDING_EXTENSIES.includes(path.extname(f).toLowerCase()))
+      .sort();
+
+    return {
+      titel: meta.titel || hoofdletter(mapnaam.replace(/-/g, " ")),
+      fotos: bestanden.map((bestand) => ({
+        foto: `/images/sfeer/${mapnaam}/${bestand}`,
+        bijschrift: bijschriftPerBestand[bestand] || meta.bijschrift || ""
+      }))
+    };
+  });
+
+  return { albums };
+}
 
 module.exports = function (eleventyConfig) {
   // Herschrijft absolute links (/css, /images, /over ...) met het pathPrefix,
@@ -38,6 +86,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addGlobalData("categorieen", CATEGORIEEN);
   // Huidig jaar bij elke build (voor de footer-copyright).
   eleventyConfig.addGlobalData("huidigJaar", () => new Date().getFullYear());
+  eleventyConfig.addGlobalData("sfeerbeelden", sfeerbeeldenData);
+  eleventyConfig.addWatchTarget("images/sfeer");
 
   // ── Datum-filters (Nederlands) ──
   eleventyConfig.addFilter("weekdag", (date) => WEEKDAGEN[d(date).getUTCDay()]);

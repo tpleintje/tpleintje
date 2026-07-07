@@ -19,26 +19,27 @@ collections:
     files:
       - name: "galerij"
         label: "Fotogalerij"
-        file: "src/_data/sfeerbeelden.json"
-        description: "Foto's van het buurthuisleven voor de pagina 'Foto's'. Sleep om de volgorde te wijzigen."
-        media_folder: "/images/sfeer"
-        public_folder: "/images/sfeer"
+        file: "src/_data/sfeerbeelden-albums.json"
+        description: "Foto's zelf upload je rechtstreeks (meerdere tegelijk mag) naar de map images/sfeer/<mapnaam>/ op GitHub — één map per activiteit/onderwerp. Hier stel je enkel per map een titel en eventueel bijschriften in."
         fields:
-          - label: "Albums (per activiteit/onderwerp)"
+          - label: "Albums (één per map in images/sfeer/)"
             name: "albums"
             label_singular: "Album"
             widget: "list"
-            summary: "{{fields.titel}}"
+            summary: "{{fields.titel}} ({{fields.map}})"
             fields:
-              - { label: "Titel (activiteit of onderwerp)", name: "titel", widget: "string" }
-              - label: "Foto's"
-                name: "fotos"
-                label_singular: "Foto"
+              - { label: "Mapnaam (exact zoals in images/sfeer/, bv. bbq-zomerfeest)", name: "map", widget: "string", hint: "Kleine letters, geen spaties — enkel a-z, 0-9 en koppeltekens." }
+              - { label: "Titel (optioneel — anders wordt de mapnaam gebruikt)", name: "titel", widget: "string", required: false }
+              - { label: "Bijschrift voor alle foto's in dit album (optioneel)", name: "bijschrift", widget: "string", required: false }
+              - label: "Bijschrift per foto (optioneel — overschrijft het album-bijschrift)"
+                name: "foto_bijschriften"
+                label_singular: "Bijschrift"
                 widget: "list"
-                summary: "{{fields.bijschrift}}"
+                required: false
+                summary: "{{fields.bestandsnaam}}"
                 fields:
-                  - { label: "Foto", name: "foto", widget: "image" }
-                  - { label: "Bijschrift", name: "bijschrift", widget: "string", required: false }
+                  - { label: "Bestandsnaam (exact, bv. IMG_1234.jpg)", name: "bestandsnaam", widget: "string" }
+                  - { label: "Bijschrift", name: "bijschrift", widget: "string" }
 
   - name: "events"
     label: "Activiteiten"
