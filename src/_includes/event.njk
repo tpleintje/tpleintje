@@ -23,7 +23,6 @@
   <div class="type-badge">{% if badge_tekst %}{{ badge_tekst }}{% else %}{{ cat.emoji }} {{ cat.label }}{% endif %}</div>
   <div class="datum-groot">{{ datum | datumGroot(einddatum) }}</div>
   <h1>{{ titel }}</h1>
-  <span class="prijs-badge">{{ prijs }}</span>
 </header>
 
 <main class="container">
@@ -72,12 +71,6 @@
     <div class="info-blok">
       <span class="label">{{ aanvang_label or "Aanvang" }}</span>
       <span class="waarde">{{ aanvang }}</span>
-    </div>
-    {% endif %}
-    {% if duur %}
-    <div class="info-blok">
-      <span class="label">Duur</span>
-      <span class="waarde">{{ duur }}</span>
     </div>
     {% endif %}
     {% if locatie_naam %}
@@ -133,7 +126,7 @@
   {% elif inschrijving %}
   <div class="inschrijf-blok">
     <h2>📋 Inschrijven{% if inschrijving_deadline %} — vóór {{ inschrijving_deadline }}{% endif %}</h2>
-    {% if plaatsen_beperkt %}<p><strong>Let op:</strong> de plaatsen zijn beperkt — schrijf tijdig in.</p>{% endif %}
+    {% if plaatsen_beperkt %}<p><strong>Let op:</strong> {% if categorie == "brugse-buurten" %}inschrijven zo snel mogelijk — de plaatsen zijn beperkt{% else %}de plaatsen zijn beperkt — schrijf tijdig in{% endif %}.</p>{% endif %}
     <p>Schrijf je in via het formulier hieronder. Liever anders? Stuur een mailtje naar <strong>{{ site.email }}</strong> of deponeer het inschrijvingsformulier in de brievenbus van het buurthuis.</p>
     <p><strong>Prijs:</strong> {{ prijs }}{% if "€" in prijs %} per deelnemer. De betaalgegevens ontvang je in je bevestigingsmail na inschrijving{% endif %}.</p>
     {% if inschrijving_deadline %}<p><strong>Deadline:</strong> inschrijven en betalen vóór <strong>{{ inschrijving_deadline }}</strong>.</p>{% endif %}

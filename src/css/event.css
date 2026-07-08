@@ -47,15 +47,6 @@ nav .site-naam { font-size: 0.9rem; color: #888; }
 }
 .event-hero .datum-groot { font-size: 1.1rem; opacity: 0.9; margin-bottom: 0.4rem; }
 .event-hero h1 { font-size: clamp(1.4rem, 4vw, 2.2rem); margin-bottom: 0.75rem; line-height: 1.25; }
-.event-hero .prijs-badge {
-  display: inline-block;
-  background: #fff;
-  color: var(--roze-donker);
-  font-weight: 700;
-  border-radius: 20px;
-  padding: 0.3rem 1.1rem;
-  font-size: 1rem;
-}
 
 /* ── Statusbanners ── */
 .status-banner {

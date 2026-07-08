@@ -12,7 +12,7 @@ prijs: Voor maaltijd volwassenen € 20/pp, kinderen 12/pp - goochelaar vanaf
 status: open
 inschrijving: true
 inschrijving_binnenkort: false
-inschrijving_deadline: de maaltijd - inschrijven vóór 15 augustus
+inschrijving_deadline: 15 augustus
 plaatsen_beperkt: false
 foto: https://armandmagic.be/wp-content/uploads/2020/08/armandmagic11.png
 gratis_tekst: Je hoeft niet in te schrijven als je niet deelneemt aan de maaltijd.

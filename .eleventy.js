@@ -6,7 +6,8 @@ const CATEGORIEEN = {
   buurtactiviteit: { emoji: "🥞", label: "Buurtactiviteit" },
   buurtactie:      { emoji: "🌿", label: "Buurtactie" },
   buurtfeest:      { emoji: "🪑", label: "Buurtfeest" },
-  tentoonstelling: { emoji: "💃", label: "Tentoonstelling" }
+  tentoonstelling: { emoji: "💃", label: "Tentoonstelling" },
+  "brugse-buurten": { emoji: "🏘️", label: "Aanbod Brugse Buurten" }
 };
 
 const WEEKDAGEN = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];

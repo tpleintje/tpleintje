@@ -1,5 +1,5 @@
 ---
-titel: "keramiek "
+titel: Keramiek
 categorie: buurtactiviteit
 datum: 2026-09-23
 aanvang: 19u

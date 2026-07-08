@@ -68,13 +68,13 @@ collections:
           - { label: "🌿 Buurtactie", value: "buurtactie" }
           - { label: "🪑 Buurtfeest", value: "buurtfeest" }
           - { label: "💃 Tentoonstelling", value: "tentoonstelling" }
+          - { label: "🏘️ Aanbod Brugse Buurten", value: "brugse-buurten" }
       - { label: "Badge-tekst (optioneel — vervangt de categorie-badge)", name: "badge_tekst", widget: "string", required: false }
       - { label: "Datum", name: "datum", widget: "datetime", date_format: "DD-MM-YYYY", time_format: false, format: "YYYY-MM-DD" }
       - { label: "Einddatum (optioneel — voor meerdaagse activiteiten)", name: "einddatum", widget: "datetime", date_format: "DD-MM-YYYY", time_format: false, format: "YYYY-MM-DD", required: false }
       - { label: "Aanvang", name: "aanvang", widget: "string", required: false, hint: "Bv. 20u00" }
       - { label: "Label bij aanvang (optioneel)", name: "aanvang_label", widget: "string", required: false, hint: "Standaard 'Aanvang'. Bv. 'Vertrek'." }
       - { label: "Einduur (optioneel)", name: "einduur", widget: "string", required: false, hint: "Vul in voor een tijdvenster, bv. 17u00" }
-      - { label: "Duur (optioneel)", name: "duur", widget: "string", required: false, hint: "Bv. 1u30" }
       - { label: "Locatie", name: "locatie_naam", widget: "string", required: false, default: "Buurthuis 't Pleintje, Sint-Baafsstraat" }
       - { label: "Adres (optioneel)", name: "locatie_adres", widget: "string", required: false }
       - { label: "Prijs", name: "prijs", widget: "string", hint: "Bv. € 5, Gratis, Vrije bijdrage" }
@@ -89,8 +89,8 @@ collections:
       - { label: "Reden van annulatie (optioneel)", name: "status_reden", widget: "text", required: false }
       - { label: "Inschrijving nodig?", name: "inschrijving", widget: "boolean", default: false }
       - { label: "Inschrijven kan binnenkort (vooraankondiging)", name: "inschrijving_binnenkort", widget: "boolean", default: false, required: false }
-      - { label: "Inschrijvingsdeadline (optioneel)", name: "inschrijving_deadline", widget: "string", required: false, hint: "Bv. 5 mei" }
-      - { label: "Plaatsen beperkt", name: "plaatsen_beperkt", widget: "boolean", default: false, required: false }
+      - { label: "Inschrijvingsdeadline (optioneel)", name: "inschrijving_deadline", widget: "string", required: false, hint: "Enkel de datum, bv. '5 mei' — er komt op de site automatisch 'Inschrijven vóór' voor te staan." }
+      - { label: "Plaatsen beperkt", name: "plaatsen_beperkt", widget: "boolean", default: false, required: false, hint: "Toont een waarschuwing dat wie wil deelnemen snel moet inschrijven." }
       - { label: "Foto (optioneel)", name: "foto", widget: "image", required: false }
       - { label: "Bijschrift bij foto (optioneel)", name: "foto_bijschrift", widget: "string", required: false }
       - { label: "Tekst bij 'geen inschrijving nodig' (optioneel)", name: "gratis_tekst", widget: "string", required: false }
