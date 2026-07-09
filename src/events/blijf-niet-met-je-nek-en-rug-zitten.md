@@ -1,5 +1,6 @@
 ---
-titel: Blijf niet met je nek en rug zitten
+titel: Blijf niet met je nek en rug zitten - infosessie
+uitgelicht: false
 categorie: infosessie
 datum: 2026-11-07
 aanvang: 9u30
