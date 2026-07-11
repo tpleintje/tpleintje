@@ -11,7 +11,7 @@ prijs: € 5
 status: open
 inschrijving: true
 inschrijving_binnenkort: false
-inschrijving_deadline: zo vlug mogelijk - plaatsen beperkt
+inschrijving_deadline: ""
 plaatsen_beperkt: true
 ---
 Je ontwerpt en maakt je eigen unieke lamp met een papercut-ontwerp, gerealiseerd met behulp van een lasercutmachine. Daarbij combineer je traditionele papiersnijtechnieken met digitale fabricatie.
