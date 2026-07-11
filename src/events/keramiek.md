@@ -1,5 +1,5 @@
 ---
-titel: Keramiek!
+titel: Keramiek
 uitgelicht: false
 categorie: brugse-buurten
 datum: 2026-09-23
