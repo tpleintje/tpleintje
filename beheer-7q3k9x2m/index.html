@@ -44,6 +44,9 @@
           info("Prijs", g('prijs'));
           if (g('status') && g('status') !== 'open') info("Status", g('status'));
           if (g('inschrijving')) info("Inschrijven", "ja" + (g('inschrijving_deadline') ? " — vóór " + g('inschrijving_deadline') : ""));
+          if (g('plaatsen_beperkt')) info("Let op", g('categorie') === 'brugse-buurten'
+            ? "inschrijven zo snel mogelijk — de plaatsen zijn beperkt"
+            : "de plaatsen zijn beperkt — schrijf tijdig in");
 
           return h('div', { style: { padding: '1.2rem 1.5rem', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#333', lineHeight: 1.6 } },
             h('h2', { style: { color: '#c45e78', marginBottom: '0.2rem' } }, g('titel')),
