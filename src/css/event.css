@@ -164,6 +164,10 @@ nav .site-naam { font-size: 0.9rem; color: #888; }
 .inschrijf-form button.btn-inschrijf { align-self: flex-start; border: none; cursor: pointer; font: inherit; margin-top: 0.3rem; }
 .inschrijf-form button.btn-inschrijf[disabled] { opacity: 0.5; cursor: default; }
 .inschrijf-form .hp { position: absolute; left: -9999px; }
+.opties-groep { display: flex; flex-direction: column; gap: 0.7rem; }
+.opties-groep label { flex-direction: row; align-items: center; justify-content: space-between; gap: 0.7rem; }
+.opties-groep input[type="number"] { width: 4.5rem; text-align: center; }
+.opties-totaal { font-size: 0.85rem; font-weight: 600; color: var(--roze-donker); margin: 0; }
 .inschrijf-status { font-size: 0.9rem; margin: 0.4rem 0 0; }
 .inschrijf-status.ok { color: #2e7d52; font-weight: 600; }
 .inschrijf-status.fout { color: #a02020; }

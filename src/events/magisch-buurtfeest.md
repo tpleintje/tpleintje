@@ -9,6 +9,11 @@ locatie_naam: Buurthuis 't Pleintje
 locatie_adres: Sint-Baafsstraat Sint-Andries Brugge
 prijs: Voor maaltijd volwassenen € 20/pp, kinderen 12/pp - goochelaar vanaf
   14u30 gratis
+opties:
+  - label: Volwassene
+    prijs: € 20
+  - label: Kind
+    prijs: € 12
 status: open
 inschrijving: true
 inschrijving_binnenkort: false

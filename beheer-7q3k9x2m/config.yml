@@ -78,6 +78,15 @@ collections:
       - { label: "Locatie", name: "locatie_naam", widget: "string", default: "Buurthuis 't Pleintje, Sint-Baafsstraat" }
       - { label: "Adres", name: "locatie_adres", widget: "string", required: false }
       - { label: "Prijs", name: "prijs", widget: "string", hint: "Bv. € 5, Gratis, Vrije bijdrage" }
+      - label: "Inschrijvingsopties"
+        name: "opties"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}}"
+        hint: "Enkel invullen als er bij inschrijven een keuze moet gemaakt worden, bv. Volwassene/Kind of Met eten/Zonder eten. Laat leeg voor een gewoon 'Aantal personen'-veld."
+        fields:
+          - { label: "Label (bv. Volwassene, Kind, Met eten, Zonder eten)", name: "label", widget: "string" }
+          - { label: "Prijs per persoon (leeg = gratis)", name: "prijs", widget: "string", required: false, hint: "Bv. € 20" }
       - label: "Status"
         name: "status"
         widget: "select"

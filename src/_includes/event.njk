@@ -139,7 +139,20 @@
       <input type="hidden" name="Betaling" value="{% if '€' in prijs %}ja{% else %}nee{% endif %}" />
       <label>Naam<input type="text" name="Naam" required /></label>
       <label>E-mail<input type="email" name="email" required /></label>
+      {% if opties and opties.length %}
+      <div class="opties-groep">
+        {% for optie in opties %}
+        <label>{{ optie.label }}{% if optie.prijs %} ({{ optie.prijs }}){% endif %}
+          <input type="number" class="optie-aantal" data-label="{{ optie.label }}" data-prijs="{{ optie.prijs or '' }}" value="0" min="0" />
+        </label>
+        {% endfor %}
+        <p class="opties-totaal"></p>
+      </div>
+      <input type="hidden" name="Aantal" class="opties-aantal-verborgen" value="0" />
+      <input type="hidden" name="Opties" class="opties-detail-verborgen" value="" />
+      {% else %}
       <label>Aantal personen<input type="number" name="Aantal" value="1" min="1" /></label>
+      {% endif %}
       <label>Opmerking (optioneel)<textarea name="Opmerking" rows="3"></textarea></label>
       <button type="submit" class="btn-inschrijf">Inschrijven</button>
       <p class="inschrijf-status" role="status" aria-live="polite"></p>
@@ -173,6 +186,43 @@
     var form = document.querySelector('.inschrijf-form');
     if (!form) return;
     var status = form.querySelector('.inschrijf-status');
+
+    // ── Inschrijvingsopties (bv. Volwassene/Kind): telt op tot Aantal + toont een totaalprijs ──
+    var optieVelden = form.querySelectorAll('.optie-aantal');
+    if (optieVelden.length) {
+      var aantalVerborgen = form.querySelector('.opties-aantal-verborgen');
+      var detailVerborgen = form.querySelector('.opties-detail-verborgen');
+      var totaalTekst = form.querySelector('.opties-totaal');
+      function prijsGetal(tekst) {
+        var m = (tekst || '').replace(',', '.').match(/[\d.]+/);
+        return m ? parseFloat(m[0]) : null;
+      }
+      function optiesBijwerken() {
+        var totaalAantal = 0, totaalBedrag = 0, onbekendePrijs = false, delen = [];
+        [].forEach.call(optieVelden, function (veld) {
+          var n = parseInt(veld.value, 10) || 0;
+          if (n > 0) {
+            delen.push(n + 'x ' + veld.getAttribute('data-label'));
+            totaalAantal += n;
+            var p = prijsGetal(veld.getAttribute('data-prijs'));
+            if (p !== null) { totaalBedrag += n * p; }
+            else if (veld.getAttribute('data-prijs')) { onbekendePrijs = true; }
+          }
+        });
+        aantalVerborgen.value = totaalAantal;
+        detailVerborgen.value = delen.join(', ');
+        if (!delen.length) {
+          totaalTekst.textContent = '';
+        } else if (onbekendePrijs) {
+          totaalTekst.textContent = delen.join(', ');
+        } else {
+          totaalTekst.textContent = delen.join(', ') + (totaalBedrag > 0 ? ' — totaal € ' + totaalBedrag.toFixed(2).replace('.', ',').replace(',00', '') : '');
+        }
+      }
+      [].forEach.call(optieVelden, function (veld) { veld.addEventListener('input', optiesBijwerken); });
+      optiesBijwerken();
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       status.className = 'inschrijf-status';
