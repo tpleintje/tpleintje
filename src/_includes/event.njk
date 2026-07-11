@@ -128,7 +128,7 @@
     <h2>📋 Inschrijven{% if inschrijving_deadline %} — vóór {{ inschrijving_deadline }}{% endif %}</h2>
     {% if plaatsen_beperkt %}<p><strong>Let op:</strong> {% if categorie == "brugse-buurten" %}inschrijven zo snel mogelijk — de plaatsen zijn beperkt{% else %}de plaatsen zijn beperkt — schrijf tijdig in{% endif %}.</p>{% endif %}
     <p>Schrijf je in via het formulier hieronder. Liever anders? Stuur een mailtje naar <strong>{{ site.email }}</strong> of deponeer het inschrijvingsformulier in de brievenbus van het buurthuis.</p>
-    <p><strong>Prijs:</strong> {{ prijs }}{% if "€" in prijs %} per deelnemer. De betaalgegevens ontvang je in je bevestigingsmail na inschrijving{% endif %}.</p>
+    <p><strong>Prijs:</strong> {{ prijs }}{% if "€" in prijs %}{% if not opties or not opties.length %} per deelnemer{% endif %}. De betaalgegevens ontvang je in je bevestigingsmail na inschrijving{% endif %}.</p>
     {% if inschrijving_deadline %}<p><strong>Deadline:</strong> inschrijven en betalen vóór <strong>{{ inschrijving_deadline }}</strong>.</p>{% endif %}
     {% if mail_extra %}<p>{{ mail_extra | safe }}</p>{% endif %}
 
