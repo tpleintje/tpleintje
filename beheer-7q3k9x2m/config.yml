@@ -1,7 +1,7 @@
 # GitHub-backend, passwordless via de Cloudflare Worker (testfase).
 backend:
   name: github
-  repo: BrunBaek/tpleintje
+  repo: tpleintje/tpleintje
   branch: main
   base_url: https://tpleintje-cms.tpleintje.workers.dev
 
