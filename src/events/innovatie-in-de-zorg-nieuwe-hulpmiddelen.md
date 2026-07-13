@@ -13,6 +13,7 @@ inschrijving: true
 inschrijving_binnenkort: false
 inschrijving_deadline: 14 september
 plaatsen_beperkt: false
+foto: /images/events/interactieve-robotkat.jpg
 ---
 Net zoals iedereen wil je graag zo lang mogelijk in je vertrouwde omgeving blijven wonen. Er zijn tal van (zorg)technologische hulpmiddelen op de markt die ondersteuning kunnen bieden bij dagelijkse activiteiten en huishoudelijke taken. Daarbovenop kan technologie helpen om fit, gezond en actief te blijven. Hierdoor kan je lang(er) én gelukkig(er) zelfstandig blijven wonen. 
 
