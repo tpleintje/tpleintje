@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # Elke dag om 4u Belgische tijd (2u UTC — 3u tijdens zomertijd) herbouwen,
+    # zodat gepasseerde activiteiten ook zonder nieuwe wijziging verdwijnen.
+    - cron: "0 2 * * *"
 
 permissions:
   contents: read
