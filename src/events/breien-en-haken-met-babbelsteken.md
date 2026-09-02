@@ -11,7 +11,7 @@ status: open
 inschrijving: false
 inschrijving_binnenkort: false
 plaatsen_beperkt: false
-foto: ""
+foto: /images/events/clker-free-vector-images-pink-306516_1920.png
 ---
 Een namiddag gezellig samen handwerken.\
 Breng je brei- of haakwerk mee.\
