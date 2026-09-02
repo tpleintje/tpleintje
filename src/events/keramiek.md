@@ -8,7 +8,7 @@ einduur: 21u30
 locatie_naam: Mam
 locatie_adres: Spoorwegstraat 4
 prijs: € 5
-status: open
+status: volzet
 inschrijving: true
 inschrijving_binnenkort: false
 inschrijving_deadline: ""
