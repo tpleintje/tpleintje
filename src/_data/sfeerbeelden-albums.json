@@ -76,16 +76,7 @@
     {
       "map": "plein test",
       "titel": "Laten we testen",
-      "foto_bijschriften": [
-        {
-          "bestandsnaam": "IMG_2223.jpeg",
-          "bijschrift": "test foto"
-        },
-        {
-          "bestandsnaam": "IMG_2228.jpeg",
-          "bijschrift": "nog een test"
-        }
-      ]
+      "foto_bijschriften": []
     }
   ]
 }
