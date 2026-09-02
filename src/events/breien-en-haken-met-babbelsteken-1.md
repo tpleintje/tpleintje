@@ -2,7 +2,7 @@
 titel: Breien en haken met babbelsteken
 uitgelicht: false
 categorie: buurtactiviteit
-datum: 2022-11-06
+datum: 2022-11-04
 aanvang: 14u
 einduur: 17u
 locatie_naam: Buurthuis 't Pleintje, Sint-Baafsstraat
