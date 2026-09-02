@@ -72,16 +72,6 @@
     {
       "map": "schilderwerken-maart-2024",
       "titel": "Schilderwerken (maart 2024)"
-    },
-    {
-      "map": "plein Test",
-      "titel": "test",
-      "foto_bijschriften": [
-        {
-          "bestandsnaam": "IMG_2223.jpeg",
-          "bijschrift": "test"
-        }
-      ]
     }
   ]
 }
