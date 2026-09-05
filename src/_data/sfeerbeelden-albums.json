@@ -76,6 +76,10 @@
     {
       "map": "Magiek",
       "titel": "Magisch buurtfeest 30 augustus 2026"
+    },
+    {
+      "map": "feest",
+      "titel": "FEEST"
     }
   ]
 }
