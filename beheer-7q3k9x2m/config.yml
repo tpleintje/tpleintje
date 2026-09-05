@@ -52,7 +52,11 @@ collections:
     extension: "md"
     format: "frontmatter"
     summary: "{{datum | date('DD/MM/YYYY')}} — {{titel}}"
-    sortable_fields: ["datum", "titel"]
+    sortable_fields:
+      fields: ["datum", "titel"]
+      default:
+        field: "datum"
+        direction: "Descending"
     fields:
       - { label: "Titel", name: "titel", widget: "string" }
       - { label: "Uitgelicht op startpagina", name: "uitgelicht", widget: "boolean", default: false, hint: "Toont deze activiteit met foto bovenaan de startpagina. Zet dit maar bij één activiteit tegelijk aan." }

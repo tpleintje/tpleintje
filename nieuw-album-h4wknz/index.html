@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>'t Pleintje — Nieuw fotoalbum</title>
+<style>
+  :root {
+    --roze:        #e8829a;
+    --roze-licht:  #fce8ed;
+    --roze-donker: #c45e78;
+    --grijs:       #f7f7f7;
+    --tekst:       #333;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: var(--tekst);
+    background: #fff;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+  h1 {
+    font-size: 1.7rem;
+    color: var(--roze-donker);
+    font-style: italic;
+    margin: 0 0 0.3rem;
+  }
+  .uitleg { color: #777; margin: 0 0 2rem; font-size: 0.96rem; }
+
+  .veld { margin-bottom: 1.4rem; }
+  .veld label {
+    display: block;
+    font-weight: 600;
+    color: var(--roze-donker);
+    margin-bottom: 0.35rem;
+    font-size: 0.95rem;
+  }
+  .veld .hint { color: #888; font-size: 0.85rem; margin-top: 0.3rem; }
+  input[type=text] {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+  input[type=text]:focus { outline: 2px solid var(--roze); border-color: var(--roze); }
+
+  .dropzone {
+    border: 2px dashed #e0b8c2;
+    border-radius: 12px;
+    background: var(--roze-licht);
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .dropzone.hover { background: #fbd6e0; border-color: var(--roze-donker); }
+  .dropzone p { margin: 0; color: var(--roze-donker); font-weight: 600; }
+  .dropzone .sub { color: #999; font-size: 0.85rem; font-weight: 400; margin-top: 0.3rem; }
+  #bestandinvoer { display: none; }
+
+  .fotolijst {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .fotolijst .item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #eee; }
+  .fotolijst img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fotolijst .verwijder {
+    position: absolute; top: 3px; right: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); color: #fff; border: none;
+    font-size: 0.85rem; line-height: 1; cursor: pointer;
+  }
+
+  button.hoofdknop {
+    width: 100%;
+    background: var(--roze-donker);
+    color: #fff;
+    border: none;
+    padding: 0.9rem;
+    border-radius: 25px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.8rem;
+    transition: background 0.15s;
+  }
+  button.hoofdknop:hover:not(:disabled) { background: var(--roze); }
+  button.hoofdknop:disabled { background: #ddd; color: #999; cursor: not-allowed; }
+
+  .status {
+    margin-top: 1.2rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    display: none;
+  }
+  .status.bezig   { display: block; background: var(--grijs); color: #555; }
+  .status.fout    { display: block; background: #fde2e2; color: #a02020; }
+  .status.gelukt  { display: block; background: #e3f5e9; color: #1f7a45; }
+
+  .login-melding {
+    background: var(--roze-licht);
+    border-radius: 12px;
+    padding: 1.4rem 1.5rem;
+    font-size: 0.96rem;
+  }
+  .login-melding a.knop, .status.gelukt a.knop {
+    display: inline-block;
+    margin-top: 0.8rem;
+    background: var(--roze-donker);
+    color: #fff !important;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 0.55rem 1.1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+  #opnieuwChecken {
+    background: none; border: none; color: var(--roze-donker); font-weight: 700;
+    text-decoration: underline; cursor: pointer; padding: 0; font-size: 0.9rem; margin-top: 0.8rem; display: inline-block;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Nieuw fotoalbum</h1>
+  <p class="uitleg">Geef het album een naam, kies je foto's, en klaar — geen GitHub of aparte instellingen nodig.</p>
+
+  <div id="loginCheck"></div>
+
+  <form id="albumForm" style="display:none">
+    <div class="veld">
+      <label for="titelVeld">Naam van het album</label>
+      <input type="text" id="titelVeld" placeholder="Bv. Kerstmarkt 2026" autocomplete="off">
+    </div>
+
+    <div class="veld">
+      <label>Foto's</label>
+      <div class="dropzone" id="dropzone">
+        <p>Sleep je foto's hierheen</p>
+        <p class="sub">of klik om te kiezen — meerdere foto's tegelijk mag</p>
+      </div>
+      <input type="file" id="bestandinvoer" accept="image/*" multiple>
+      <div class="fotolijst" id="fotolijst"></div>
+    </div>
+
+    <div class="veld">
+      <label for="bijschriftVeld">Bijschrift (optioneel)</label>
+      <input type="text" id="bijschriftVeld" placeholder="Komt onder alle foto's van dit album" autocomplete="off">
+    </div>
+
+    <button type="submit" class="hoofdknop" id="verzendKnop">Album toevoegen</button>
+    <div class="status" id="status"></div>
+  </form>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const REPO = "tpleintje/tpleintje";
+  const BRANCH = "main";
+  const SFEER_PAD = "images/sfeer";
+  const ALBUMS_JSON_PAD = "src/_data/sfeerbeelden-albums.json";
+  const ADMIN_URL = "../beheer-7q3k9x2m/";
+
+  const loginCheck = document.getElementById("loginCheck");
+  const form = document.getElementById("albumForm");
+  const dropzone = document.getElementById("dropzone");
+  const bestandinvoer = document.getElementById("bestandinvoer");
+  const fotolijstEl = document.getElementById("fotolijst");
+  const statusEl = document.getElementById("status");
+  const verzendKnop = document.getElementById("verzendKnop");
+  const titelVeld = document.getElementById("titelVeld");
+  const bijschriftVeld = document.getElementById("bijschriftVeld");
+
+  let gekozenBestanden = [];
+
+  function getToken() {
+    try {
+      const raw = window.localStorage.getItem("decap-cms-user");
+      if (!raw) return null;
+      const user = JSON.parse(raw);
+      return (user && user.token) ? user.token : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function toonLoginStatus() {
+    if (getToken()) {
+      loginCheck.innerHTML = "";
+      form.style.display = "block";
+      return true;
+    }
+    form.style.display = "none";
+    loginCheck.innerHTML =
+      '<div class="login-melding">' +
+      "Je bent nog niet ingelogd. Log eerst in via het beheerpaneel, en kom dan hierheen terug." +
+      '<br><a class="knop" href="' + ADMIN_URL + '" target="_blank" rel="noopener">Open het beheerpaneel</a>' +
+      '<br><button type="button" id="opnieuwChecken">Ik ben ingelogd — controleer opnieuw</button>' +
+      "</div>";
+    const btn = document.getElementById("opnieuwChecken");
+    if (btn) btn.addEventListener("click", toonLoginStatus);
+    return false;
+  }
+
+  function slugify(s) {
+    return s
+      .normalize("NFD").replace(new RegExp("[" + String.fromCharCode(768) + "-" + String.fromCharCode(879) + "]", "g"), "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function titelVanSlug(slug) {
+    return slug.replace(/-/g, " ").replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+  }
+
+  function sanitizeBestandsnaam(naam) {
+    const punt = naam.lastIndexOf(".");
+    const basis = punt > 0 ? naam.slice(0, punt) : naam;
+    const ext = punt > 0 ? naam.slice(punt).toLowerCase() : "";
+    return (slugify(basis) || "foto") + ext;
+  }
+
+  function fileNaarBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = () => reject(new Error("Kon " + file.name + " niet lezen."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function utf8NaarBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  function base64NaarUtf8(str) {
+    return decodeURIComponent(escape(atob(str)));
+  }
+
+  async function gh(pad, opties) {
+    opties = opties || {};
+    const token = getToken();
+    if (!token) throw new Error("Niet (meer) ingelogd. Log opnieuw in via het beheerpaneel.");
+    const headers = Object.assign(
+      { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" },
+      opties.body ? { "Content-Type": "application/json" } : {},
+      opties.headers || {}
+    );
+    const res = await fetch("https://api.github.com/repos/" + REPO + pad, Object.assign({}, opties, { headers }));
+    if (!res.ok) {
+      let detail = "";
+      try { detail = (await res.json()).message || ""; } catch (e) {}
+      throw new Error("GitHub gaf een fout terug (" + res.status + "). " + detail);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  async function albumBestaatAl(mapnaam) {
+    try {
+      const listing = await gh("/contents/" + SFEER_PAD);
+      return listing.some((item) => item.type === "dir" && item.name.toLowerCase() === mapnaam);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function zetStatus(klasse, tekst) {
+    statusEl.className = "status " + klasse;
+    statusEl.innerHTML = tekst;
+  }
+
+  function toonFotolijst() {
+    fotolijstEl.innerHTML = "";
+    gekozenBestanden.forEach((file, i) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      const knop = document.createElement("button");
+      knop.type = "button";
+      knop.className = "verwijder";
+      knop.textContent = "×";
+      knop.title = "Verwijder deze foto";
+      knop.addEventListener("click", () => {
+        gekozenBestanden.splice(i, 1);
+        toonFotolijst();
+      });
+      div.appendChild(img);
+      div.appendChild(knop);
+      fotolijstEl.appendChild(div);
+    });
+  }
+
+  function voegBestandenToe(bestandenLijst) {
+    for (const file of bestandenLijst) {
+      if (file.type && file.type.startsWith("image/")) gekozenBestanden.push(file);
+    }
+    toonFotolijst();
+  }
+
+  dropzone.addEventListener("click", () => bestandinvoer.click());
+  bestandinvoer.addEventListener("change", (e) => voegBestandenToe(e.target.files));
+  ["dragenter", "dragover"].forEach((ev) =>
+    dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("hover"); })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("hover"); })
+  );
+  dropzone.addEventListener("drop", (e) => {
+    if (e.dataTransfer && e.dataTransfer.files) voegBestandenToe(e.dataTransfer.files);
+  });
+
+  async function voegAlbumToe(titel, bijschrift, bestanden, onVoortgang) {
+    const mapnaam = slugify(titel);
+    if (!mapnaam) throw new Error("Geef een naam voor het album op.");
+    if (!bestanden.length) throw new Error("Kies minstens één foto.");
+
+    onVoortgang("Even nakijken of dit album al bestaat…");
+    if (await albumBestaatAl(mapnaam)) {
+      throw new Error("Er bestaat al een album met (bijna) deze naam. Kies een net iets andere naam.");
+    }
+
+    onVoortgang("Laatste stand van de website ophalen…");
+    const ref = await gh("/git/ref/heads/" + BRANCH);
+    const laatsteCommitSha = ref.object.sha;
+    const laatsteCommit = await gh("/git/commits/" + laatsteCommitSha);
+    const baseTree = laatsteCommit.tree.sha;
+
+    const treeEntries = [];
+    const gebruikteNamen = new Set();
+
+    for (let i = 0; i < bestanden.length; i++) {
+      const file = bestanden[i];
+      onVoortgang("Foto " + (i + 1) + " van " + bestanden.length + " voorbereiden…");
+      let naam = sanitizeBestandsnaam(file.name);
+      let uniekeNaam = naam;
+      let teller = 2;
+      while (gebruikteNamen.has(uniekeNaam)) {
+        const punt = naam.lastIndexOf(".");
+        uniekeNaam = punt > 0 ? naam.slice(0, punt) + "-" + teller + naam.slice(punt) : naam + "-" + teller;
+        teller++;
+      }
+      gebruikteNamen.add(uniekeNaam);
+
+      const base64 = await fileNaarBase64(file);
+      const blob = await gh("/git/blobs", { method: "POST", body: JSON.stringify({ content: base64, encoding: "base64" }) });
+      treeEntries.push({ path: SFEER_PAD + "/" + mapnaam + "/" + uniekeNaam, mode: "100644", type: "blob", sha: blob.sha });
+    }
+
+    const autoTitel = titelVanSlug(mapnaam);
+    if ((titel && titel !== autoTitel) || bijschrift) {
+      onVoortgang("Albumnaam opslaan…");
+      let huidigeData = { albums: [] };
+      try {
+        const bestand = await gh("/contents/" + ALBUMS_JSON_PAD);
+        huidigeData = JSON.parse(base64NaarUtf8(bestand.content));
+      } catch (e) { /* bestand bestaat nog niet: begin leeg */ }
+      huidigeData.albums = huidigeData.albums || [];
+      const nieuwEntry = { map: mapnaam, titel: titel };
+      if (bijschrift) nieuwEntry.bijschrift = bijschrift;
+      huidigeData.albums.push(nieuwEntry);
+
+      const jsonBlob = await gh("/git/blobs", {
+        method: "POST",
+        body: JSON.stringify({ content: utf8NaarBase64(JSON.stringify(huidigeData, null, 2)), encoding: "base64" })
+      });
+      treeEntries.push({ path: ALBUMS_JSON_PAD, mode: "100644", type: "blob", sha: jsonBlob.sha });
+    }
+
+    onVoortgang("Wijzigingen samenvoegen…");
+    const nieuweTree = await gh("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: baseTree, tree: treeEntries }) });
+
+    onVoortgang("Opslaan…");
+    const nieuweCommit = await gh("/git/commits", {
+      method: "POST",
+      body: JSON.stringify({ message: "Nieuw fotoalbum: " + titel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
+    });
+
+    onVoortgang("Publiceren…");
+    await gh("/git/refs/heads/" + BRANCH, { method: "PATCH", body: JSON.stringify({ sha: nieuweCommit.sha }) });
+
+    return mapnaam;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    verzendKnop.disabled = true;
+    zetStatus("bezig", "Bezig…");
+    try {
+      const mapnaam = await voegAlbumToe(
+        titelVeld.value.trim(),
+        bijschriftVeld.value.trim(),
+        gekozenBestanden,
+        (tekst) => zetStatus("bezig", tekst)
+      );
+      zetStatus("gelukt",
+        "Gelukt! Het album staat klaar. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten." +
+        '<br><a class="knop" href="https://tpleintje.github.io/tpleintje/sfeerbeelden/" target="_blank" rel="noopener">Bekijk de sfeerbeelden-pagina</a>'
+      );
+      form.reset();
+      gekozenBestanden = [];
+      toonFotolijst();
+    } catch (err) {
+      zetStatus("fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
+    } finally {
+      verzendKnop.disabled = false;
+    }
+  });
+
+  toonLoginStatus();
+})();
+</script>
+</body>
+</html>

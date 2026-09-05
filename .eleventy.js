@@ -83,6 +83,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("images");
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy("beheer-7q3k9x2m");
+  eleventyConfig.addPassthroughCopy("nieuw-album-h4wknz");
 
   eleventyConfig.addGlobalData("categorieen", CATEGORIEEN);
   // Huidig jaar bij elke build (voor de footer-copyright).
