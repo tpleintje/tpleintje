@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>'t Pleintje — Nieuw fotoalbum</title>
+<title>'t Pleintje — Fotoalbums beheren</title>
 <style>
   :root {
     --roze:        #e8829a;
     --roze-licht:  #fce8ed;
     --roze-donker: #c45e78;
+    --rood:        #c4495e;
+    --rood-licht:  #fce8ea;
     --grijs:       #f7f7f7;
     --tekst:       #333;
   }
@@ -28,7 +30,19 @@
     font-style: italic;
     margin: 0 0 0.3rem;
   }
-  .uitleg { color: #777; margin: 0 0 2rem; font-size: 0.96rem; }
+  .uitleg { color: #777; margin: 0 0 1.6rem; font-size: 0.96rem; }
+
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.8rem; border-bottom: 2px solid var(--roze-licht); }
+  .tab-knop {
+    background: none; border: none; cursor: pointer;
+    padding: 0.6rem 0.2rem; margin-bottom: -2px;
+    font-size: 0.98rem; font-weight: 600; color: #999;
+    border-bottom: 2px solid transparent; font-family: inherit;
+  }
+  .tab-knop + .tab-knop { margin-left: 1.2rem; }
+  .tab-knop.actief { color: var(--roze-donker); border-bottom-color: var(--roze-donker); }
+  .tab-paneel { display: none; }
+  .tab-paneel.actief { display: block; }
 
   .veld { margin-bottom: 1.4rem; }
   .veld label {
@@ -38,16 +52,16 @@
     margin-bottom: 0.35rem;
     font-size: 0.95rem;
   }
-  .veld .hint { color: #888; font-size: 0.85rem; margin-top: 0.3rem; }
-  input[type=text] {
+  input[type=text], select {
     width: 100%;
     padding: 0.65rem 0.8rem;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
+    background: #fff;
   }
-  input[type=text]:focus { outline: 2px solid var(--roze); border-color: var(--roze); }
+  input[type=text]:focus, select:focus { outline: 2px solid var(--roze); border-color: var(--roze); }
 
   .dropzone {
     border: 2px dashed #e0b8c2;
@@ -78,6 +92,17 @@
     font-size: 0.85rem; line-height: 1; cursor: pointer;
   }
 
+  .album-preview {
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--grijs);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    display: none;
+  }
+  .album-preview.zichtbaar { display: block; }
+
   button.hoofdknop {
     width: 100%;
     background: var(--roze-donker);
@@ -92,6 +117,8 @@
     transition: background 0.15s;
   }
   button.hoofdknop:hover:not(:disabled) { background: var(--roze); }
+  button.hoofdknop.gevaar { background: var(--rood); }
+  button.hoofdknop.gevaar:hover:not(:disabled) { background: #d96678; }
   button.hoofdknop:disabled { background: #ddd; color: #999; cursor: not-allowed; }
 
   .status {
@@ -130,35 +157,56 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Nieuw fotoalbum</h1>
-  <p class="uitleg">Geef het album een naam, kies je foto's, en klaar — geen GitHub of aparte instellingen nodig.</p>
+  <h1>Fotoalbums beheren</h1>
+  <p class="uitleg">Toevoegen of verwijderen — geen GitHub of aparte instellingen nodig.</p>
 
   <div id="loginCheck"></div>
 
-  <form id="albumForm" style="display:none">
-    <div class="veld">
-      <label for="titelVeld">Naam van het album</label>
-      <input type="text" id="titelVeld" placeholder="Bv. Kerstmarkt 2026" autocomplete="off">
+  <div id="tabsEnPanelen" style="display:none">
+    <div class="tabs">
+      <button type="button" class="tab-knop actief" data-tab="toevoegen">Nieuw album</button>
+      <button type="button" class="tab-knop" data-tab="verwijderen">Album verwijderen</button>
     </div>
 
-    <div class="veld">
-      <label>Foto's</label>
-      <div class="dropzone" id="dropzone">
-        <p>Sleep je foto's hierheen</p>
-        <p class="sub">of klik om te kiezen — meerdere foto's tegelijk mag</p>
+    <div class="tab-paneel actief" id="paneel-toevoegen">
+      <form id="albumForm">
+        <div class="veld">
+          <label for="titelVeld">Naam van het album</label>
+          <input type="text" id="titelVeld" placeholder="Bv. Kerstmarkt 2026" autocomplete="off">
+        </div>
+
+        <div class="veld">
+          <label>Foto's</label>
+          <div class="dropzone" id="dropzone">
+            <p>Sleep je foto's hierheen</p>
+            <p class="sub">of klik om te kiezen — meerdere foto's tegelijk mag</p>
+          </div>
+          <input type="file" id="bestandinvoer" accept="image/*" multiple>
+          <div class="fotolijst" id="fotolijst"></div>
+        </div>
+
+        <div class="veld">
+          <label for="bijschriftVeld">Bijschrift (optioneel)</label>
+          <input type="text" id="bijschriftVeld" placeholder="Komt onder alle foto's van dit album" autocomplete="off">
+        </div>
+
+        <button type="submit" class="hoofdknop" id="verzendKnop">Album toevoegen</button>
+        <div class="status" id="statusToevoegen"></div>
+      </form>
+    </div>
+
+    <div class="tab-paneel" id="paneel-verwijderen">
+      <div class="veld">
+        <label for="albumSelect">Welk album wil je verwijderen?</label>
+        <select id="albumSelect">
+          <option value="">Albums laden…</option>
+        </select>
       </div>
-      <input type="file" id="bestandinvoer" accept="image/*" multiple>
-      <div class="fotolijst" id="fotolijst"></div>
+      <div class="album-preview" id="albumPreview"></div>
+      <button type="button" class="hoofdknop gevaar" id="verwijderKnop" disabled>Album verwijderen</button>
+      <div class="status" id="statusVerwijderen"></div>
     </div>
-
-    <div class="veld">
-      <label for="bijschriftVeld">Bijschrift (optioneel)</label>
-      <input type="text" id="bijschriftVeld" placeholder="Komt onder alle foto's van dit album" autocomplete="off">
-    </div>
-
-    <button type="submit" class="hoofdknop" id="verzendKnop">Album toevoegen</button>
-    <div class="status" id="status"></div>
-  </form>
+  </div>
 </div>
 
 <script>
@@ -172,16 +220,23 @@
   const ADMIN_URL = "../beheer-7q3k9x2m/";
 
   const loginCheck = document.getElementById("loginCheck");
+  const tabsEnPanelen = document.getElementById("tabsEnPanelen");
   const form = document.getElementById("albumForm");
   const dropzone = document.getElementById("dropzone");
   const bestandinvoer = document.getElementById("bestandinvoer");
   const fotolijstEl = document.getElementById("fotolijst");
-  const statusEl = document.getElementById("status");
+  const statusToevoegen = document.getElementById("statusToevoegen");
   const verzendKnop = document.getElementById("verzendKnop");
   const titelVeld = document.getElementById("titelVeld");
   const bijschriftVeld = document.getElementById("bijschriftVeld");
 
+  const albumSelect = document.getElementById("albumSelect");
+  const albumPreview = document.getElementById("albumPreview");
+  const verwijderKnop = document.getElementById("verwijderKnop");
+  const statusVerwijderen = document.getElementById("statusVerwijderen");
+
   let gekozenBestanden = [];
+  let albumsCache = null;
 
   function getToken() {
     try {
@@ -197,10 +252,10 @@
   function toonLoginStatus() {
     if (getToken()) {
       loginCheck.innerHTML = "";
-      form.style.display = "block";
+      tabsEnPanelen.style.display = "block";
       return true;
     }
-    form.style.display = "none";
+    tabsEnPanelen.style.display = "none";
     loginCheck.innerHTML =
       '<div class="login-melding">' +
       "Je bent nog niet ingelogd. Log eerst in via het beheerpaneel, en kom dan hierheen terug." +
@@ -212,6 +267,18 @@
     return false;
   }
 
+  // ── Tabs ──
+  document.querySelectorAll(".tab-knop").forEach((knop) => {
+    knop.addEventListener("click", () => {
+      document.querySelectorAll(".tab-knop").forEach((k) => k.classList.remove("actief"));
+      document.querySelectorAll(".tab-paneel").forEach((p) => p.classList.remove("actief"));
+      knop.classList.add("actief");
+      document.getElementById("paneel-" + knop.dataset.tab).classList.add("actief");
+      if (knop.dataset.tab === "verwijderen") laadAlbumSelect();
+    });
+  });
+
+  // ── Gedeelde hulpfuncties ──
   function slugify(s) {
     return s
       .normalize("NFD").replace(new RegExp("[" + String.fromCharCode(768) + "-" + String.fromCharCode(879) + "]", "g"), "")
@@ -267,20 +334,35 @@
     return res.json();
   }
 
+  async function haalAlbumsJson() {
+    try {
+      const bestand = await gh("/contents/" + ALBUMS_JSON_PAD);
+      return { data: JSON.parse(base64NaarUtf8(bestand.content)), sha: bestand.sha };
+    } catch (e) {
+      return { data: { albums: [] }, sha: null };
+    }
+  }
+
+  async function haalAlbumMappen() {
+    const listing = await gh("/contents/" + SFEER_PAD);
+    return listing.filter((item) => item.type === "dir").map((item) => item.name);
+  }
+
   async function albumBestaatAl(mapnaam) {
     try {
-      const listing = await gh("/contents/" + SFEER_PAD);
-      return listing.some((item) => item.type === "dir" && item.name.toLowerCase() === mapnaam);
+      const mappen = await haalAlbumMappen();
+      return mappen.some((naam) => naam.toLowerCase() === mapnaam);
     } catch (e) {
       return false;
     }
   }
 
-  function zetStatus(klasse, tekst) {
-    statusEl.className = "status " + klasse;
-    statusEl.innerHTML = tekst;
+  function zetStatus(el, klasse, tekst) {
+    el.className = "status " + klasse;
+    el.innerHTML = tekst;
   }
 
+  // ── Tab 1: album toevoegen ──
   function toonFotolijst() {
     fotolijstEl.innerHTML = "";
     gekozenBestanden.forEach((file, i) => {
@@ -362,11 +444,7 @@
     const autoTitel = titelVanSlug(mapnaam);
     if ((titel && titel !== autoTitel) || bijschrift) {
       onVoortgang("Albumnaam opslaan…");
-      let huidigeData = { albums: [] };
-      try {
-        const bestand = await gh("/contents/" + ALBUMS_JSON_PAD);
-        huidigeData = JSON.parse(base64NaarUtf8(bestand.content));
-      } catch (e) { /* bestand bestaat nog niet: begin leeg */ }
+      const { data: huidigeData } = await haalAlbumsJson();
       huidigeData.albums = huidigeData.albums || [];
       const nieuwEntry = { map: mapnaam, titel: titel };
       if (bijschrift) nieuwEntry.bijschrift = bijschrift;
@@ -397,25 +475,144 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     verzendKnop.disabled = true;
-    zetStatus("bezig", "Bezig…");
+    zetStatus(statusToevoegen, "bezig", "Bezig…");
     try {
-      const mapnaam = await voegAlbumToe(
+      await voegAlbumToe(
         titelVeld.value.trim(),
         bijschriftVeld.value.trim(),
         gekozenBestanden,
-        (tekst) => zetStatus("bezig", tekst)
+        (tekst) => zetStatus(statusToevoegen, "bezig", tekst)
       );
-      zetStatus("gelukt",
+      zetStatus(statusToevoegen, "gelukt",
         "Gelukt! Het album staat klaar. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten." +
         '<br><a class="knop" href="https://tpleintje.github.io/tpleintje/sfeerbeelden/" target="_blank" rel="noopener">Bekijk de sfeerbeelden-pagina</a>'
       );
       form.reset();
       gekozenBestanden = [];
       toonFotolijst();
+      albumsCache = null;
     } catch (err) {
-      zetStatus("fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
+      zetStatus(statusToevoegen, "fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
     } finally {
       verzendKnop.disabled = false;
+    }
+  });
+
+  // ── Tab 2: album verwijderen ──
+  async function laadAlbumSelect() {
+    zetStatus(statusVerwijderen, "", "");
+    statusVerwijderen.style.display = "none";
+    albumPreview.classList.remove("zichtbaar");
+    verwijderKnop.disabled = true;
+    albumSelect.innerHTML = '<option value="">Albums laden…</option>';
+    try {
+      if (!albumsCache) {
+        const [mappen, { data: albumsJson }] = await Promise.all([haalAlbumMappen(), haalAlbumsJson()]);
+        const metaPerMap = {};
+        (albumsJson.albums || []).forEach((a) => { metaPerMap[a.map] = a; });
+        albumsCache = mappen
+          .map((map) => ({ map: map, titel: (metaPerMap[map] && metaPerMap[map].titel) || titelVanSlug(map) }))
+          .sort((a, b) => a.titel.localeCompare(b.titel, "nl"));
+      }
+      if (!albumsCache.length) {
+        albumSelect.innerHTML = '<option value="">Er zijn nog geen albums</option>';
+        return;
+      }
+      albumSelect.innerHTML = '<option value="">Kies een album…</option>' +
+        albumsCache.map((a) => '<option value="' + a.map + '">' + a.titel + "</option>").join("");
+    } catch (err) {
+      albumSelect.innerHTML = '<option value="">Kon albums niet laden</option>';
+      zetStatus(statusVerwijderen, "fout", err.message || "Kon de albumlijst niet ophalen.");
+    }
+  }
+
+  albumSelect.addEventListener("change", async () => {
+    const mapnaam = albumSelect.value;
+    if (!mapnaam) {
+      albumPreview.classList.remove("zichtbaar");
+      verwijderKnop.disabled = true;
+      return;
+    }
+    albumPreview.classList.add("zichtbaar");
+    albumPreview.textContent = "Bekijken…";
+    try {
+      const bestanden = await gh("/contents/" + SFEER_PAD + "/" + mapnaam);
+      const namen = bestanden.map((f) => f.name);
+      albumPreview.textContent = "Dit album bevat " + namen.length + " foto('s): " + namen.join(", ");
+      verwijderKnop.disabled = false;
+    } catch (err) {
+      albumPreview.textContent = "Kon de inhoud van dit album niet ophalen.";
+      verwijderKnop.disabled = true;
+    }
+  });
+
+  async function verwijderAlbum(mapnaam, titel, onVoortgang) {
+    onVoortgang("Foto's van dit album ophalen…");
+    const bestanden = await gh("/contents/" + SFEER_PAD + "/" + mapnaam);
+
+    onVoortgang("Laatste stand van de website ophalen…");
+    const ref = await gh("/git/ref/heads/" + BRANCH);
+    const laatsteCommitSha = ref.object.sha;
+    const laatsteCommit = await gh("/git/commits/" + laatsteCommitSha);
+    const baseTree = laatsteCommit.tree.sha;
+
+    const treeEntries = bestanden.map((f) => ({
+      path: SFEER_PAD + "/" + mapnaam + "/" + f.name,
+      mode: "100644",
+      type: "blob",
+      sha: null
+    }));
+
+    onVoortgang("Albuminstelling opruimen…");
+    const { data: huidigeData } = await haalAlbumsJson();
+    const aantalVoor = (huidigeData.albums || []).length;
+    huidigeData.albums = (huidigeData.albums || []).filter((a) => a.map !== mapnaam);
+    if (huidigeData.albums.length !== aantalVoor) {
+      const jsonBlob = await gh("/git/blobs", {
+        method: "POST",
+        body: JSON.stringify({ content: utf8NaarBase64(JSON.stringify(huidigeData, null, 2)), encoding: "base64" })
+      });
+      treeEntries.push({ path: ALBUMS_JSON_PAD, mode: "100644", type: "blob", sha: jsonBlob.sha });
+    }
+
+    onVoortgang("Wijzigingen samenvoegen…");
+    const nieuweTree = await gh("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: baseTree, tree: treeEntries }) });
+
+    onVoortgang("Opslaan…");
+    const nieuweCommit = await gh("/git/commits", {
+      method: "POST",
+      body: JSON.stringify({ message: "Fotoalbum verwijderd: " + titel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
+    });
+
+    onVoortgang("Publiceren…");
+    await gh("/git/refs/heads/" + BRANCH, { method: "PATCH", body: JSON.stringify({ sha: nieuweCommit.sha }) });
+  }
+
+  verwijderKnop.addEventListener("click", async () => {
+    const mapnaam = albumSelect.value;
+    const optie = albumSelect.options[albumSelect.selectedIndex];
+    const titel = optie ? optie.textContent : mapnaam;
+    if (!mapnaam) return;
+
+    const zeker = window.confirm(
+      "Album \"" + titel + "\" en al zijn foto's definitief verwijderen?\n\nDit kan niet ongedaan gemaakt worden."
+    );
+    if (!zeker) return;
+
+    verwijderKnop.disabled = true;
+    albumSelect.disabled = true;
+    zetStatus(statusVerwijderen, "bezig", "Bezig…");
+    try {
+      await verwijderAlbum(mapnaam, titel, (tekst) => zetStatus(statusVerwijderen, "bezig", tekst));
+      zetStatus(statusVerwijderen, "gelukt", "Verwijderd. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten.");
+      albumPreview.classList.remove("zichtbaar");
+      albumsCache = null;
+      await laadAlbumSelect();
+    } catch (err) {
+      zetStatus(statusVerwijderen, "fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
+      verwijderKnop.disabled = false;
+    } finally {
+      albumSelect.disabled = false;
     }
   });
 
