@@ -137,7 +137,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addCollection("voorbije", (api) =>
     api.getFilteredByTag("event")
       .filter((ev) => einde(ev) < vandaag())
-      .sort((a, b) => new Date(b.data.datum) - new Date(a.data.datum))
+      .sort((a, b) => new Date(a.data.datum) - new Date(b.data.datum))
   );
 
   // Activiteit die met een foto bovenaan de startpagina uitgelicht wordt (CMS-vinkje).

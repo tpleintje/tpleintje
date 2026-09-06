@@ -54,7 +54,7 @@ collections:
     summary: "{{datum | date('DD/MM/YYYY')}} — {{titel}}"
     sortable_fields:
       - field: "datum"
-        default_sort: "desc"
+        default_sort: "asc"
       - "titel"
     fields:
       - { label: "Titel", name: "titel", widget: "string" }
