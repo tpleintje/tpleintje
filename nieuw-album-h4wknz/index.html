@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>'t Pleintje — Fotoalbums beheren</title>
+<title>'t Pleintje — Fotogalerijen beheren</title>
 <style>
   :root {
     --roze:        #e8829a;
@@ -75,7 +75,7 @@
   .dropzone.hover { background: #fbd6e0; border-color: var(--roze-donker); }
   .dropzone p { margin: 0; color: var(--roze-donker); font-weight: 600; }
   .dropzone .sub { color: #999; font-size: 0.85rem; font-weight: 400; margin-top: 0.3rem; }
-  #bestandinvoer { display: none; }
+  #bestandinvoer, #bestandinvoerBewerk { display: none; }
 
   .fotolijst {
     display: grid;
@@ -157,21 +157,22 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Fotoalbums beheren</h1>
-  <p class="uitleg">Toevoegen of verwijderen — geen GitHub of aparte instellingen nodig.</p>
+  <h1>Fotogalerijen beheren</h1>
+  <p class="uitleg">Toevoegen, bewerken of verwijderen — geen GitHub of aparte instellingen nodig.</p>
 
   <div id="loginCheck"></div>
 
   <div id="tabsEnPanelen" style="display:none">
     <div class="tabs">
-      <button type="button" class="tab-knop actief" data-tab="toevoegen">Nieuw album</button>
-      <button type="button" class="tab-knop" data-tab="verwijderen">Album verwijderen</button>
+      <button type="button" class="tab-knop actief" data-tab="toevoegen">Nieuwe galerij</button>
+      <button type="button" class="tab-knop" data-tab="bewerken">Bewerken</button>
+      <button type="button" class="tab-knop" data-tab="verwijderen">Galerij verwijderen</button>
     </div>
 
     <div class="tab-paneel actief" id="paneel-toevoegen">
       <form id="albumForm">
         <div class="veld">
-          <label for="titelVeld">Naam van het album</label>
+          <label for="titelVeld">Naam van de galerij</label>
           <input type="text" id="titelVeld" placeholder="Bv. Kerstmarkt 2026" autocomplete="off">
         </div>
 
@@ -187,23 +188,57 @@
 
         <div class="veld">
           <label for="bijschriftVeld">Bijschrift (optioneel)</label>
-          <input type="text" id="bijschriftVeld" placeholder="Komt onder alle foto's van dit album" autocomplete="off">
+          <input type="text" id="bijschriftVeld" placeholder="Komt onder alle foto's van deze galerij" autocomplete="off">
         </div>
 
-        <button type="submit" class="hoofdknop" id="verzendKnop">Album toevoegen</button>
+        <button type="submit" class="hoofdknop" id="verzendKnop">Galerij toevoegen</button>
         <div class="status" id="statusToevoegen"></div>
       </form>
     </div>
 
+    <div class="tab-paneel" id="paneel-bewerken">
+      <div class="veld">
+        <label for="bewerkSelect">Welke galerij wil je bewerken?</label>
+        <select id="bewerkSelect">
+          <option value="">Galerijen laden…</option>
+        </select>
+      </div>
+
+      <div id="bewerkFormulier" style="display:none">
+        <div class="veld">
+          <label for="bewerkTitelVeld">Naam van de galerij</label>
+          <input type="text" id="bewerkTitelVeld" placeholder="Bv. Kerstmarkt 2026" autocomplete="off">
+        </div>
+
+        <div class="veld">
+          <label for="bewerkBijschriftVeld">Bijschrift (optioneel)</label>
+          <input type="text" id="bewerkBijschriftVeld" placeholder="Komt onder alle foto's van deze galerij" autocomplete="off">
+        </div>
+
+        <div class="veld">
+          <label>Foto's</label>
+          <div class="fotolijst" id="bewerkFotolijst"></div>
+          <div class="dropzone" id="dropzoneBewerk" style="margin-top:1rem">
+            <p>Sleep extra foto's hierheen</p>
+            <p class="sub">of klik om te kiezen — meerdere foto's tegelijk mag</p>
+          </div>
+          <input type="file" id="bestandinvoerBewerk" accept="image/*" multiple>
+        </div>
+
+        <button type="button" class="hoofdknop" id="bewerkOpslaanKnop">Wijzigingen opslaan</button>
+      </div>
+      <div class="status" id="statusBewerken"></div>
+    </div>
+
     <div class="tab-paneel" id="paneel-verwijderen">
       <div class="veld">
-        <label for="albumSelect">Welk album wil je verwijderen?</label>
+        <label for="albumSelect">Welke galerij wil je verwijderen?</label>
         <select id="albumSelect">
-          <option value="">Albums laden…</option>
+          <option value="">Galerijen laden…</option>
         </select>
       </div>
       <div class="album-preview" id="albumPreview"></div>
-      <button type="button" class="hoofdknop gevaar" id="verwijderKnop" disabled>Album verwijderen</button>
+      <button type="button" class="hoofdknop gevaar" id="verwijderKnop" disabled>Galerij verwijderen</button>
       <div class="status" id="statusVerwijderen"></div>
     </div>
   </div>
@@ -235,8 +270,23 @@
   const verwijderKnop = document.getElementById("verwijderKnop");
   const statusVerwijderen = document.getElementById("statusVerwijderen");
 
+  const bewerkSelect = document.getElementById("bewerkSelect");
+  const bewerkFormulier = document.getElementById("bewerkFormulier");
+  const bewerkTitelVeld = document.getElementById("bewerkTitelVeld");
+  const bewerkBijschriftVeld = document.getElementById("bewerkBijschriftVeld");
+  const bewerkFotolijstEl = document.getElementById("bewerkFotolijst");
+  const dropzoneBewerk = document.getElementById("dropzoneBewerk");
+  const bestandinvoerBewerk = document.getElementById("bestandinvoerBewerk");
+  const bewerkOpslaanKnop = document.getElementById("bewerkOpslaanKnop");
+  const statusBewerken = document.getElementById("statusBewerken");
+
   let gekozenBestanden = [];
   let albumsCache = null;
+  let albumsMetaCache = null; // raw albums.json data for edit meta
+  let bewerkMap = null;
+  let bewerkBestaandeFotos = []; // { name, url }
+  let bewerkTeVerwijderen = new Set();
+  let bewerkNieuweBestanden = [];
 
   function getToken() {
     try {
@@ -258,7 +308,7 @@
     tabsEnPanelen.style.display = "none";
     loginCheck.innerHTML =
       '<div class="login-melding">' +
-      "Je bent nog niet ingelogd. Log eerst één keer in via Activiteiten (Decap). Daarna werken fotoalbums hier ook." +
+      "Je bent nog niet ingelogd. Log eerst één keer in via Activiteiten (Decap). Daarna werken fotogalerijen hier ook." +
       '<br><a class="knop" href="' + ADMIN_URL + '" target="_blank" rel="noopener">Inloggen via Activiteiten</a>' +
       '<br><a href="../hub-df5d0dd9/" style="display:inline-block;margin-top:0.7rem;color:var(--roze-donker);font-weight:700;">← Terug naar Beheer ’t Pleintje</a>' +
       '<br><button type="button" id="opnieuwChecken">Ik ben ingelogd — controleer opnieuw</button>' +
@@ -276,6 +326,7 @@
       knop.classList.add("actief");
       document.getElementById("paneel-" + knop.dataset.tab).classList.add("actief");
       if (knop.dataset.tab === "verwijderen") laadAlbumSelect();
+      if (knop.dataset.tab === "bewerken") laadBewerkSelect();
     });
   });
 
@@ -407,12 +458,12 @@
 
   async function voegAlbumToe(titel, bijschrift, bestanden, onVoortgang) {
     const mapnaam = slugify(titel);
-    if (!mapnaam) throw new Error("Geef een naam voor het album op.");
+    if (!mapnaam) throw new Error("Geef een naam voor de galerij op.");
     if (!bestanden.length) throw new Error("Kies minstens één foto.");
 
-    onVoortgang("Even nakijken of dit album al bestaat…");
+    onVoortgang("Even nakijken of deze galerij al bestaat…");
     if (await albumBestaatAl(mapnaam)) {
-      throw new Error("Er bestaat al een album met (bijna) deze naam. Kies een net iets andere naam.");
+      throw new Error("Er bestaat al een galerij met (bijna) deze naam. Kies een net iets andere naam.");
     }
 
     onVoortgang("Laatste stand van de website ophalen…");
@@ -444,7 +495,7 @@
 
     const autoTitel = titelVanSlug(mapnaam);
     if ((titel && titel !== autoTitel) || bijschrift) {
-      onVoortgang("Albumnaam opslaan…");
+      onVoortgang("Galerijnaam opslaan…");
       const { data: huidigeData } = await haalAlbumsJson();
       huidigeData.albums = huidigeData.albums || [];
       const nieuwEntry = { map: mapnaam, titel: titel };
@@ -464,7 +515,7 @@
     onVoortgang("Opslaan…");
     const nieuweCommit = await gh("/git/commits", {
       method: "POST",
-      body: JSON.stringify({ message: "Nieuw fotoalbum: " + titel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
+      body: JSON.stringify({ message: "Nieuwe fotogalerij: " + titel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
     });
 
     onVoortgang("Publiceren…");
@@ -485,13 +536,14 @@
         (tekst) => zetStatus(statusToevoegen, "bezig", tekst)
       );
       zetStatus(statusToevoegen, "gelukt",
-        "Gelukt! Het album staat klaar. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten." +
+        "Gelukt! De galerij staat klaar. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten." +
         '<br><a class="knop" href="https://tpleintje.github.io/tpleintje/sfeerbeelden/" target="_blank" rel="noopener">Bekijk de sfeerbeelden-pagina</a>'
       );
       form.reset();
       gekozenBestanden = [];
       toonFotolijst();
       albumsCache = null;
+      albumsMetaCache = null;
     } catch (err) {
       zetStatus(statusToevoegen, "fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
     } finally {
@@ -505,25 +557,18 @@
     statusVerwijderen.style.display = "none";
     albumPreview.classList.remove("zichtbaar");
     verwijderKnop.disabled = true;
-    albumSelect.innerHTML = '<option value="">Albums laden…</option>';
+    albumSelect.innerHTML = '<option value="">Galerijen laden…</option>';
     try {
-      if (!albumsCache) {
-        const [mappen, { data: albumsJson }] = await Promise.all([haalAlbumMappen(), haalAlbumsJson()]);
-        const metaPerMap = {};
-        (albumsJson.albums || []).forEach((a) => { metaPerMap[a.map] = a; });
-        albumsCache = mappen
-          .map((map) => ({ map: map, titel: (metaPerMap[map] && metaPerMap[map].titel) || titelVanSlug(map) }))
-          .sort((a, b) => a.titel.localeCompare(b.titel, "nl"));
-      }
+      await ensureAlbumsCache();
       if (!albumsCache.length) {
-        albumSelect.innerHTML = '<option value="">Er zijn nog geen albums</option>';
+        albumSelect.innerHTML = '<option value="">Er zijn nog geen galerijen</option>';
         return;
       }
-      albumSelect.innerHTML = '<option value="">Kies een album…</option>' +
+      albumSelect.innerHTML = '<option value="">Kies een galerij…</option>' +
         albumsCache.map((a) => '<option value="' + a.map + '">' + a.titel + "</option>").join("");
     } catch (err) {
-      albumSelect.innerHTML = '<option value="">Kon albums niet laden</option>';
-      zetStatus(statusVerwijderen, "fout", err.message || "Kon de albumlijst niet ophalen.");
+      albumSelect.innerHTML = '<option value="">Kon galerijen niet laden</option>';
+      zetStatus(statusVerwijderen, "fout", err.message || "Kon de galerijlijst niet ophalen.");
     }
   }
 
@@ -539,16 +584,16 @@
     try {
       const bestanden = await gh("/contents/" + SFEER_PAD + "/" + mapnaam);
       const namen = bestanden.map((f) => f.name);
-      albumPreview.textContent = "Dit album bevat " + namen.length + " foto('s): " + namen.join(", ");
+      albumPreview.textContent = "Deze galerij bevat " + namen.length + " foto('s): " + namen.join(", ");
       verwijderKnop.disabled = false;
     } catch (err) {
-      albumPreview.textContent = "Kon de inhoud van dit album niet ophalen.";
+      albumPreview.textContent = "Kon de inhoud van deze galerij niet ophalen.";
       verwijderKnop.disabled = true;
     }
   });
 
   async function verwijderAlbum(mapnaam, titel, onVoortgang) {
-    onVoortgang("Foto's van dit album ophalen…");
+    onVoortgang("Foto's van deze galerij ophalen…");
     const bestanden = await gh("/contents/" + SFEER_PAD + "/" + mapnaam);
 
     onVoortgang("Laatste stand van de website ophalen…");
@@ -564,7 +609,7 @@
       sha: null
     }));
 
-    onVoortgang("Albuminstelling opruimen…");
+    onVoortgang("Galerijinstelling opruimen…");
     const { data: huidigeData } = await haalAlbumsJson();
     const aantalVoor = (huidigeData.albums || []).length;
     huidigeData.albums = (huidigeData.albums || []).filter((a) => a.map !== mapnaam);
@@ -582,7 +627,7 @@
     onVoortgang("Opslaan…");
     const nieuweCommit = await gh("/git/commits", {
       method: "POST",
-      body: JSON.stringify({ message: "Fotoalbum verwijderd: " + titel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
+      body: JSON.stringify({ message: "Fotogalerij verwijderd: " + titel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
     });
 
     onVoortgang("Publiceren…");
@@ -596,7 +641,7 @@
     if (!mapnaam) return;
 
     const zeker = window.confirm(
-      "Album \"" + titel + "\" en al zijn foto's definitief verwijderen?\n\nDit kan niet ongedaan gemaakt worden."
+      "Galerij \"" + titel + "\" en al haar foto's definitief verwijderen?\n\nDit kan niet ongedaan gemaakt worden."
     );
     if (!zeker) return;
 
@@ -608,12 +653,277 @@
       zetStatus(statusVerwijderen, "gelukt", "Verwijderd. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten.");
       albumPreview.classList.remove("zichtbaar");
       albumsCache = null;
+      albumsMetaCache = null;
       await laadAlbumSelect();
     } catch (err) {
       zetStatus(statusVerwijderen, "fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
       verwijderKnop.disabled = false;
     } finally {
       albumSelect.disabled = false;
+    }
+  });
+
+
+  // ── Tab: galerij bewerken ──
+  function resetBewerkFormulier() {
+    bewerkMap = null;
+    bewerkBestaandeFotos = [];
+    bewerkTeVerwijderen = new Set();
+    bewerkNieuweBestanden = [];
+    bewerkTitelVeld.value = "";
+    bewerkBijschriftVeld.value = "";
+    bewerkFotolijstEl.innerHTML = "";
+    bewerkFormulier.style.display = "none";
+    bestandinvoerBewerk.value = "";
+  }
+
+  async function ensureAlbumsCache() {
+    if (albumsCache) return;
+    const [mappen, { data: albumsJson }] = await Promise.all([haalAlbumMappen(), haalAlbumsJson()]);
+    albumsMetaCache = albumsJson;
+    const metaPerMap = {};
+    (albumsJson.albums || []).forEach((a) => { metaPerMap[a.map] = a; });
+    albumsCache = mappen
+      .map((map) => ({
+        map: map,
+        titel: (metaPerMap[map] && metaPerMap[map].titel) || titelVanSlug(map),
+        bijschrift: (metaPerMap[map] && metaPerMap[map].bijschrift) || "",
+        foto_bijschriften: (metaPerMap[map] && metaPerMap[map].foto_bijschriften) || []
+      }))
+      .sort((a, b) => a.titel.localeCompare(b.titel, "nl"));
+  }
+
+  async function laadBewerkSelect(opties) {
+    opties = opties || {};
+    if (!opties.behoudStatus) {
+      zetStatus(statusBewerken, "", "");
+      statusBewerken.style.display = "none";
+    }
+    resetBewerkFormulier();
+    bewerkSelect.innerHTML = '<option value="">Galerijen laden…</option>';
+    try {
+      await ensureAlbumsCache();
+      if (!albumsCache.length) {
+        bewerkSelect.innerHTML = '<option value="">Er zijn nog geen galerijen</option>';
+        return;
+      }
+      bewerkSelect.innerHTML = '<option value="">Kies een galerij…</option>' +
+        albumsCache.map((a) => '<option value="' + a.map + '">' + a.titel + "</option>").join("");
+    } catch (err) {
+      bewerkSelect.innerHTML = '<option value="">Kon galerijen niet laden</option>';
+      zetStatus(statusBewerken, "fout", err.message || "Kon de galerijlijst niet ophalen.");
+    }
+  }
+
+  function toonBewerkFotolijst() {
+    bewerkFotolijstEl.innerHTML = "";
+    bewerkBestaandeFotos.forEach((foto) => {
+      if (bewerkTeVerwijderen.has(foto.name)) return;
+      const div = document.createElement("div");
+      div.className = "item";
+      const img = document.createElement("img");
+      img.src = foto.url;
+      img.alt = foto.name;
+      const knop = document.createElement("button");
+      knop.type = "button";
+      knop.className = "verwijder";
+      knop.textContent = "×";
+      knop.title = "Verwijder deze foto";
+      knop.addEventListener("click", () => {
+        bewerkTeVerwijderen.add(foto.name);
+        toonBewerkFotolijst();
+      });
+      div.appendChild(img);
+      div.appendChild(knop);
+      bewerkFotolijstEl.appendChild(div);
+    });
+    bewerkNieuweBestanden.forEach((file, i) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      const knop = document.createElement("button");
+      knop.type = "button";
+      knop.className = "verwijder";
+      knop.textContent = "×";
+      knop.title = "Verwijder deze foto";
+      knop.addEventListener("click", () => {
+        bewerkNieuweBestanden.splice(i, 1);
+        toonBewerkFotolijst();
+      });
+      div.appendChild(img);
+      div.appendChild(knop);
+      bewerkFotolijstEl.appendChild(div);
+    });
+  }
+
+  function voegBewerkBestandenToe(bestandenLijst) {
+    for (const file of bestandenLijst) {
+      if (file.type && file.type.startsWith("image/")) bewerkNieuweBestanden.push(file);
+    }
+    toonBewerkFotolijst();
+  }
+
+  dropzoneBewerk.addEventListener("click", () => bestandinvoerBewerk.click());
+  bestandinvoerBewerk.addEventListener("change", (e) => voegBewerkBestandenToe(e.target.files));
+  ["dragenter", "dragover"].forEach((ev) =>
+    dropzoneBewerk.addEventListener(ev, (e) => { e.preventDefault(); dropzoneBewerk.classList.add("hover"); })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    dropzoneBewerk.addEventListener(ev, (e) => { e.preventDefault(); dropzoneBewerk.classList.remove("hover"); })
+  );
+  dropzoneBewerk.addEventListener("drop", (e) => {
+    if (e.dataTransfer && e.dataTransfer.files) voegBewerkBestandenToe(e.dataTransfer.files);
+  });
+
+  bewerkSelect.addEventListener("change", async () => {
+    const mapnaam = bewerkSelect.value;
+    zetStatus(statusBewerken, "", "");
+    statusBewerken.style.display = "none";
+    if (!mapnaam) {
+      resetBewerkFormulier();
+      return;
+    }
+    bewerkFormulier.style.display = "block";
+    bewerkMap = mapnaam;
+    bewerkTeVerwijderen = new Set();
+    bewerkNieuweBestanden = [];
+    bestandinvoerBewerk.value = "";
+
+    const meta = (albumsCache || []).find((a) => a.map === mapnaam) || {};
+    bewerkTitelVeld.value = meta.titel || titelVanSlug(mapnaam);
+    bewerkBijschriftVeld.value = meta.bijschrift || "";
+
+    bewerkFotolijstEl.innerHTML = "";
+    zetStatus(statusBewerken, "bezig", "Foto's laden…");
+    try {
+      const bestanden = await gh("/contents/" + SFEER_PAD + "/" + mapnaam);
+      bewerkBestaandeFotos = (bestanden || [])
+        .filter((f) => f.type === "file")
+        .map((f) => ({ name: f.name, url: f.download_url || f.html_url }));
+      toonBewerkFotolijst();
+      zetStatus(statusBewerken, "", "");
+      statusBewerken.style.display = "none";
+    } catch (err) {
+      bewerkBestaandeFotos = [];
+      toonBewerkFotolijst();
+      zetStatus(statusBewerken, "fout", err.message || "Kon de foto's van deze galerij niet ophalen.");
+    }
+  });
+
+  async function bewerkAlbumOpslaan(mapnaam, titel, bijschrift, bestaandeFotos, teVerwijderen, nieuweBestanden, onVoortgang) {
+    if (!mapnaam) throw new Error("Kies eerst een galerij.");
+    const schoneTitel = (titel || "").trim();
+    if (!schoneTitel) throw new Error("Geef een naam voor de galerij op.");
+
+    const overgebleven = bestaandeFotos.filter((f) => !teVerwijderen.has(f.name));
+    if (!overgebleven.length && !nieuweBestanden.length) {
+      throw new Error("Een galerij moet minstens één foto behouden. Voeg een foto toe of verwijder minder foto's.");
+    }
+
+    onVoortgang("Laatste stand van de website ophalen…");
+    const ref = await gh("/git/ref/heads/" + BRANCH);
+    const laatsteCommitSha = ref.object.sha;
+    const laatsteCommit = await gh("/git/commits/" + laatsteCommitSha);
+    const baseTree = laatsteCommit.tree.sha;
+
+    const treeEntries = [];
+
+    // Verwijder gemarkeerde foto's (map/slug blijft ongewijzigd)
+    for (const naam of teVerwijderen) {
+      treeEntries.push({
+        path: SFEER_PAD + "/" + mapnaam + "/" + naam,
+        mode: "100644",
+        type: "blob",
+        sha: null
+      });
+    }
+
+    const gebruikteNamen = new Set(overgebleven.map((f) => f.name));
+    for (let i = 0; i < nieuweBestanden.length; i++) {
+      const file = nieuweBestanden[i];
+      onVoortgang("Nieuwe foto " + (i + 1) + " van " + nieuweBestanden.length + " voorbereiden…");
+      let naam = sanitizeBestandsnaam(file.name);
+      let uniekeNaam = naam;
+      let teller = 2;
+      while (gebruikteNamen.has(uniekeNaam)) {
+        const punt = naam.lastIndexOf(".");
+        uniekeNaam = punt > 0 ? naam.slice(0, punt) + "-" + teller + naam.slice(punt) : naam + "-" + teller;
+        teller++;
+      }
+      gebruikteNamen.add(uniekeNaam);
+
+      const base64 = await fileNaarBase64(file);
+      const blob = await gh("/git/blobs", { method: "POST", body: JSON.stringify({ content: base64, encoding: "base64" }) });
+      treeEntries.push({ path: SFEER_PAD + "/" + mapnaam + "/" + uniekeNaam, mode: "100644", type: "blob", sha: blob.sha });
+    }
+
+    onVoortgang("Galerijgegevens bijwerken…");
+    const { data: huidigeData } = await haalAlbumsJson();
+    huidigeData.albums = huidigeData.albums || [];
+    let entry = huidigeData.albums.find((a) => a.map === mapnaam);
+    if (!entry) {
+      entry = { map: mapnaam };
+      huidigeData.albums.push(entry);
+    }
+    entry.titel = schoneTitel;
+    const schoonBijschrift = (bijschrift || "").trim();
+    if (schoonBijschrift) {
+      entry.bijschrift = schoonBijschrift;
+    } else {
+      delete entry.bijschrift;
+    }
+    if (Array.isArray(entry.foto_bijschriften) && teVerwijderen.size) {
+      entry.foto_bijschriften = entry.foto_bijschriften.filter((fb) => !teVerwijderen.has(fb.bestandsnaam));
+      if (!entry.foto_bijschriften.length) delete entry.foto_bijschriften;
+    }
+
+    const jsonBlob = await gh("/git/blobs", {
+      method: "POST",
+      body: JSON.stringify({ content: utf8NaarBase64(JSON.stringify(huidigeData, null, 2)), encoding: "base64" })
+    });
+    treeEntries.push({ path: ALBUMS_JSON_PAD, mode: "100644", type: "blob", sha: jsonBlob.sha });
+
+    onVoortgang("Wijzigingen samenvoegen…");
+    const nieuweTree = await gh("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: baseTree, tree: treeEntries }) });
+
+    onVoortgang("Opslaan…");
+    const nieuweCommit = await gh("/git/commits", {
+      method: "POST",
+      body: JSON.stringify({ message: "Fotogalerij bewerkt: " + schoneTitel, tree: nieuweTree.sha, parents: [laatsteCommitSha] })
+    });
+
+    onVoortgang("Publiceren…");
+    await gh("/git/refs/heads/" + BRANCH, { method: "PATCH", body: JSON.stringify({ sha: nieuweCommit.sha }) });
+  }
+
+  bewerkOpslaanKnop.addEventListener("click", async () => {
+    if (!bewerkMap) return;
+    bewerkOpslaanKnop.disabled = true;
+    bewerkSelect.disabled = true;
+    zetStatus(statusBewerken, "bezig", "Bezig…");
+    try {
+      await bewerkAlbumOpslaan(
+        bewerkMap,
+        bewerkTitelVeld.value,
+        bewerkBijschriftVeld.value,
+        bewerkBestaandeFotos,
+        bewerkTeVerwijderen,
+        bewerkNieuweBestanden,
+        (tekst) => zetStatus(statusBewerken, "bezig", tekst)
+      );
+      albumsCache = null;
+      albumsMetaCache = null;
+      await laadBewerkSelect({ behoudStatus: true });
+      zetStatus(statusBewerken, "gelukt",
+        "Gelukt! De wijzigingen staan klaar. De website bouwt zichzelf nu opnieuw op — dat duurt meestal 1 à 2 minuten." +
+        '<br><a class="knop" href="https://tpleintje.github.io/tpleintje/sfeerbeelden/" target="_blank" rel="noopener">Bekijk de sfeerbeelden-pagina</a>'
+      );
+    } catch (err) {
+      zetStatus(statusBewerken, "fout", err.message || "Er ging iets mis. Probeer het nog eens, of stuur een schermafbeelding door.");
+    } finally {
+      bewerkOpslaanKnop.disabled = false;
+      bewerkSelect.disabled = false;
     }
   });
 
