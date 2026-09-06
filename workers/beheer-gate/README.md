@@ -26,3 +26,18 @@ Publieke site blijft: https://tpleintje.github.io/tpleintje/
 - Open Worker-URL → browser vraagt login → user `tpleintje` + wachtwoord
 - Hub → Fotogalerijen / Activiteiten (relative links)
 - Publieke site zonder login: https://tpleintje.github.io/tpleintje/
+
+## Secrets opnieuw zetten (zonder trailing newline)
+
+In `~/tpleintje/workers/beheer-gate`:
+
+```bash
+npx wrangler secret put BASIC_USER
+# typ exact: tpleintje   (Enter; geen spaties)
+
+npx wrangler secret put BASIC_PASSWORD
+# plak GitHub-wachtwoord van account tpleintje, Enter
+# géén `echo … | secret put` (dat zet vaak een \n mee)
+```
+
+Daarna hard refresh / privévenster op de Worker-URL.
