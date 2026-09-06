@@ -1,0 +1,126 @@
+# GitHub-backend, passwordless via de Cloudflare Worker (testfase).
+backend:
+  name: github
+  repo: tpleintje/tpleintje
+  branch: main
+  base_url: https://tpleintje-cms.tpleintje.workers.dev
+
+# Lokaal testen blijft mogelijk via: npx decap-server
+local_backend: true
+
+media_folder: "images/events"
+public_folder: "/images/events"
+
+locale: "nl"
+
+collections:
+  - name: "sfeerbeelden"
+    label: "Sfeerbeelden (foto's)"
+    files:
+      - name: "galerij"
+        label: "Fotogalerij"
+        file: "src/_data/sfeerbeelden-albums.json"
+        description: "Foto's zelf upload je rechtstreeks (meerdere tegelijk mag) naar de map images/sfeer/<mapnaam>/ op GitHub — één map per activiteit/onderwerp. Hier stel je enkel per map een titel en eventueel bijschriften in."
+        fields:
+          - label: "Albums (één per map in images/sfeer/)"
+            name: "albums"
+            label_singular: "Album"
+            widget: "list"
+            summary: "{{fields.titel}} ({{fields.map}})"
+            fields:
+              - { label: "Mapnaam (exact zoals in images/sfeer/, bv. bbq-zomerfeest)", name: "map", widget: "string", hint: "Kleine letters, geen spaties — enkel a-z, 0-9 en koppeltekens." }
+              - { label: "Titel (anders wordt de mapnaam gebruikt)", name: "titel", widget: "string", required: false }
+              - { label: "Bijschrift voor alle foto's in dit album", name: "bijschrift", widget: "string", required: false }
+              - label: "Bijschrift per foto (overschrijft het album-bijschrift)"
+                name: "foto_bijschriften"
+                label_singular: "Bijschrift"
+                widget: "list"
+                required: false
+                summary: "{{fields.bestandsnaam}}"
+                fields:
+                  - { label: "Bestandsnaam (exact, bv. IMG_1234.jpg)", name: "bestandsnaam", widget: "string" }
+                  - { label: "Bijschrift", name: "bijschrift", widget: "string" }
+
+  - name: "events"
+    label: "Activiteiten"
+    label_singular: "Activiteit"
+    description: "Beheer hier de activiteiten die op de kalender verschijnen."
+    folder: "src/events"
+    create: true
+    identifier_field: titel
+    slug: "{{slug}}"
+    extension: "md"
+    format: "frontmatter"
+    summary: "{{datum | date('DD/MM/YYYY')}} — {{titel}}"
+    sortable_fields:
+      - field: "datum"
+        default_sort: "asc"
+      - "titel"
+    fields:
+      - { label: "Titel", name: "titel", widget: "string" }
+      - { label: "Uitgelicht op startpagina", name: "uitgelicht", widget: "boolean", default: false, hint: "Toont deze activiteit met foto bovenaan de startpagina. Zet dit maar bij één activiteit tegelijk aan." }
+      - label: "Categorie"
+        name: "categorie"
+        widget: "select"
+        options:
+          - { label: "🎬 Film", value: "film" }
+          - { label: "🎭 Voorstelling", value: "voorstelling" }
+          - { label: "🩺 Infosessie", value: "infosessie" }
+          - { label: "🚴 Uitstap", value: "uitstap" }
+          - { label: "🥞 Buurtactiviteit", value: "buurtactiviteit" }
+          - { label: "🌿 Buurtactie", value: "buurtactie" }
+          - { label: "🪑 Buurtfeest", value: "buurtfeest" }
+          - { label: "💃 Tentoonstelling", value: "tentoonstelling" }
+          - { label: "🏘️ Aanbod Brugse Buurten", value: "brugse-buurten" }
+      - { label: "Badge-tekst (vervangt de categorie-badge)", name: "badge_tekst", widget: "string", required: false }
+      - { label: "Datum", name: "datum", widget: "datetime", date_format: "DD-MM-YYYY", time_format: false, format: "YYYY-MM-DD" }
+      - { label: "Einddatum (voor meerdaagse activiteiten)", name: "einddatum", widget: "datetime", date_format: "DD-MM-YYYY", time_format: false, format: "YYYY-MM-DD", required: false }
+      - { label: "Aanvang", name: "aanvang", widget: "string", hint: "Bv. 20u00" }
+      - { label: "Label bij aanvang", name: "aanvang_label", widget: "string", required: false, hint: "Standaard 'Aanvang'. Bv. 'Vertrek'." }
+      - { label: "Einduur", name: "einduur", widget: "string", required: false, hint: "Vul in voor een tijdvenster, bv. 17u00" }
+      - { label: "Locatie", name: "locatie_naam", widget: "string", default: "Buurthuis 't Pleintje, Sint-Baafsstraat" }
+      - { label: "Adres", name: "locatie_adres", widget: "string", required: false }
+      - { label: "Prijs", name: "prijs", widget: "string", hint: "Bv. € 5, Gratis, Vrije bijdrage" }
+      - label: "Inschrijvingsopties"
+        name: "opties"
+        widget: "list"
+        required: false
+        summary: "{{fields.label}}"
+        hint: "Enkel invullen als er bij inschrijven een keuze moet gemaakt worden, bv. Volwassene/Kind of Met eten/Zonder eten. Laat leeg voor een gewoon 'Aantal personen'-veld."
+        fields:
+          - { label: "Label (bv. Volwassene, Kind, Met eten, Zonder eten)", name: "label", widget: "string" }
+          - { label: "Prijs per persoon (leeg = gratis)", name: "prijs", widget: "string", required: false, hint: "Bv. € 20" }
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        default: "open"
+        options:
+          - { label: "Open", value: "open" }
+          - { label: "Volzet", value: "volzet" }
+          - { label: "Geannuleerd", value: "geannuleerd" }
+      - { label: "Reden van annulatie", name: "status_reden", widget: "text", required: false }
+      - { label: "Inschrijving nodig?", name: "inschrijving", widget: "boolean", default: false }
+      - { label: "Inschrijven kan binnenkort (vooraankondiging)", name: "inschrijving_binnenkort", widget: "boolean", default: false }
+      - { label: "Inschrijvingsdeadline", name: "inschrijving_deadline", widget: "string", required: false, hint: "Enkel de datum, bv. '5 mei' — er komt op de site automatisch 'Inschrijven vóór' voor te staan." }
+      - { label: "Plaatsen beperkt", name: "plaatsen_beperkt", widget: "boolean", default: false, hint: "Toont een waarschuwing dat wie wil deelnemen snel moet inschrijven." }
+      - { label: "Foto", name: "foto", widget: "image", required: false }
+      - { label: "Bijschrift bij foto", name: "foto_bijschrift", widget: "string", required: false }
+      - { label: "Tekst bij 'geen inschrijving nodig'", name: "gratis_tekst", widget: "string", required: false }
+      - { label: "Extra info voor bevestigingsmail", name: "mail_extra", widget: "text", required: false }
+      - { label: "Meer info-link", name: "meer_info_url", widget: "string", required: false }
+      - { label: "Tekst bij de link", name: "meer_info_tekst", widget: "string", required: false }
+      - label: "Extra info-blokjes"
+        name: "extra_blokken"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Label", name: "label", widget: "string" }
+          - { label: "Waarde", name: "waarde", widget: "string" }
+      - label: "Fotogalerij"
+        name: "galerij"
+        widget: "list"
+        required: false
+        fields:
+          - { label: "Afbeelding", name: "afbeelding", widget: "image" }
+          - { label: "Bijschrift", name: "bijschrift", widget: "string", required: false }
+      - { label: "Beschrijving", name: "body", widget: "markdown" }

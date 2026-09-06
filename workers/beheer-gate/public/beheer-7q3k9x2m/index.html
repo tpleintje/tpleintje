@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>'t Pleintje — Beheer</title>
+</head>
+<body>
+  <!-- Decap CMS: beheer van activiteiten achter login -->
+  <script src="https://unpkg.com/decap-cms@3.16.0/dist/decap-cms.js"></script>
+
+  <!-- Voorbeeldvenster van een activiteit: nette datum (bv. "Zondag 30 augustus 2026"). -->
+  <script>
+    (function () {
+      if (typeof CMS === 'undefined' || typeof createClass === 'undefined' || typeof h === 'undefined') return;
+
+      var WEEKDAGEN = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
+      var MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
+      function hoofdletter(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+      function datumMooi(waarde) {
+        if (!waarde) return "";
+        var d = new Date(waarde);
+        if (isNaN(d.getTime())) return waarde;
+        return hoofdletter(WEEKDAGEN[d.getUTCDay()]) + " " + d.getUTCDate() + " " + MAANDEN[d.getUTCMonth()] + " " + d.getUTCFullYear();
+      }
+
+      var EventPreview = createClass({
+        render: function () {
+          var entry = this.props.entry;
+          var g = function (veld) { return entry.getIn(['data', veld]); };
+
+          var datumTekst = datumMooi(g('datum'));
+          if (g('einddatum')) datumTekst += " – " + datumMooi(g('einddatum'));
+
+          var rijen = [];
+          function info(label, waarde) {
+            if (waarde) rijen.push(h('p', { key: label, style: { margin: '0.2rem 0' } }, h('strong', {}, label + ": "), waarde));
+          }
+          var tijd = g('aanvang') || "";
+          if (g('einduur')) tijd += (tijd ? " – " : "") + g('einduur');
+          info(g('aanvang_label') || "Aanvang", tijd);
+          info("Locatie", g('locatie_naam'));
+          info("Adres", g('locatie_adres'));
+          info("Prijs", g('prijs'));
+          if (g('status') && g('status') !== 'open') info("Status", g('status'));
+          if (g('inschrijving')) info("Inschrijven", "ja" + (g('inschrijving_deadline') ? " — vóór " + g('inschrijving_deadline') : ""));
+          if (g('plaatsen_beperkt')) info("Let op", g('categorie') === 'brugse-buurten'
+            ? "inschrijven zo snel mogelijk — de plaatsen zijn beperkt"
+            : "de plaatsen zijn beperkt — schrijf tijdig in");
+
+          return h('div', { style: { padding: '1.2rem 1.5rem', fontFamily: "'Segoe UI', Arial, sans-serif", color: '#333', lineHeight: 1.6 } },
+            h('h2', { style: { color: '#c45e78', marginBottom: '0.2rem' } }, g('titel')),
+            h('p', { style: { color: '#888', marginTop: 0, fontSize: '0.95rem' } }, datumTekst),
+            h('div', { style: { margin: '0.8rem 0' } }, rijen),
+            h('hr', { style: { border: 'none', borderTop: '1px solid #eee', margin: '1rem 0' } }),
+            this.props.widgetFor('body')
+          );
+        }
+      });
+
+      CMS.registerPreviewTemplate('events', EventPreview);
+    })();
+  </script>
+</body>
+</html>
