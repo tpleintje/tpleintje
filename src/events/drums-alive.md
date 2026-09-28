@@ -7,7 +7,7 @@ aanvang: 9u
 einduur: 10u30
 locatie_naam: Koude Keuken
 prijs: € 3/pp
-status: open
+status: volzet
 inschrijving: true
 inschrijving_binnenkort: false
 inschrijving_deadline: ""
