@@ -10,7 +10,7 @@ prijs: € 5
 status: open
 inschrijving: true
 inschrijving_binnenkort: false
-inschrijving_deadline: 24 september
+inschrijving_deadline: 28 september
 plaatsen_beperkt: true
 ---
 Wandeling met natuurgids in het Maskobos.\
