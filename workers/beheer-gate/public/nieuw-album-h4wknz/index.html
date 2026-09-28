@@ -149,6 +149,20 @@
     border-radius: 20px;
     font-size: 0.9rem;
   }
+  .gphotos-rij { margin-top: 0.7rem; }
+  button.gphotos-knop {
+    background: #fff; color: var(--roze-donker);
+    border: 2px solid var(--roze-donker); border-radius: 20px;
+    padding: 0.45rem 1rem; font-size: 0.92rem; font-weight: 700;
+    font-family: inherit; cursor: pointer;
+  }
+  button.gphotos-knop:hover:not(:disabled) { background: var(--roze-licht); }
+  button.gphotos-knop:disabled { color: #aaa; border-color: #ddd; cursor: not-allowed; }
+  .gphotos-status { margin-top: 0.6rem; }
+  .gphotos-status a, .gphotos-status button.link {
+    color: var(--roze-donker); font-weight: 700; background: none; border: none;
+    padding: 0; font: inherit; text-decoration: underline; cursor: pointer;
+  }
   #opnieuwChecken {
     background: none; border: none; color: var(--roze-donker); font-weight: 700;
     text-decoration: underline; cursor: pointer; padding: 0; font-size: 0.9rem; margin-top: 0.8rem; display: inline-block;
@@ -183,6 +197,10 @@
             <p class="sub">of klik om te kiezen — meerdere foto's tegelijk mag</p>
           </div>
           <input type="file" id="bestandinvoer" accept="image/*" multiple>
+          <div class="gphotos-rij">
+            <button type="button" class="gphotos-knop" data-doel="toevoegen">Importeer uit Google Photos</button>
+            <div class="status gphotos-status" id="gphotosStatusToevoegen"></div>
+          </div>
           <div class="fotolijst" id="fotolijst"></div>
         </div>
 
@@ -223,6 +241,10 @@
             <p class="sub">of klik om te kiezen — meerdere foto's tegelijk mag</p>
           </div>
           <input type="file" id="bestandinvoerBewerk" accept="image/*" multiple>
+          <div class="gphotos-rij">
+            <button type="button" class="gphotos-knop" data-doel="bewerken">Importeer uit Google Photos</button>
+            <div class="status gphotos-status" id="gphotosStatusBewerken"></div>
+          </div>
         </div>
 
         <button type="button" class="hoofdknop" id="bewerkOpslaanKnop">Wijzigingen opslaan</button>
@@ -244,6 +266,7 @@
   </div>
 </div>
 
+<script src="gphotos-import.js"></script>
 <script>
 (function () {
   "use strict";
@@ -493,21 +516,20 @@
       treeEntries.push({ path: SFEER_PAD + "/" + mapnaam + "/" + uniekeNaam, mode: "100644", type: "blob", sha: blob.sha });
     }
 
-    const autoTitel = titelVanSlug(mapnaam);
-    if ((titel && titel !== autoTitel) || bijschrift) {
-      onVoortgang("Galerijnaam opslaan…");
-      const { data: huidigeData } = await haalAlbumsJson();
-      huidigeData.albums = huidigeData.albums || [];
-      const nieuwEntry = { map: mapnaam, titel: titel };
-      if (bijschrift) nieuwEntry.bijschrift = bijschrift;
-      huidigeData.albums.push(nieuwEntry);
+    // Altijd een album-entry in sfeerbeelden-albums.json, zodat de galerij ook in Decap
+    // (Sfeerbeelden) verschijnt voor titel/bijschriften per foto.
+    onVoortgang("Galerijnaam opslaan…");
+    const { data: huidigeData } = await haalAlbumsJson();
+    huidigeData.albums = (huidigeData.albums || []).filter((a) => a.map !== mapnaam);
+    const nieuwEntry = { map: mapnaam, titel: titel || titelVanSlug(mapnaam) };
+    if (bijschrift) nieuwEntry.bijschrift = bijschrift;
+    huidigeData.albums.push(nieuwEntry);
 
-      const jsonBlob = await gh("/git/blobs", {
-        method: "POST",
-        body: JSON.stringify({ content: utf8NaarBase64(JSON.stringify(huidigeData, null, 2)), encoding: "base64" })
-      });
-      treeEntries.push({ path: ALBUMS_JSON_PAD, mode: "100644", type: "blob", sha: jsonBlob.sha });
-    }
+    const jsonBlob = await gh("/git/blobs", {
+      method: "POST",
+      body: JSON.stringify({ content: utf8NaarBase64(JSON.stringify(huidigeData, null, 2)), encoding: "base64" })
+    });
+    treeEntries.push({ path: ALBUMS_JSON_PAD, mode: "100644", type: "blob", sha: jsonBlob.sha });
 
     onVoortgang("Wijzigingen samenvoegen…");
     const nieuweTree = await gh("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: baseTree, tree: treeEntries }) });
@@ -926,6 +948,189 @@
       bewerkSelect.disabled = false;
     }
   });
+
+  // ── Google Photos-import (Picker API) ──
+  // Gekozen foto's komen als gewone File-objecten in dezelfde lijst als lokaal gekozen
+  // foto's; de bestaande knop (Galerij toevoegen / Wijzigingen opslaan) doet de rest.
+  const GP = window.TpGPhotos;
+  const GP_CONFIG_URL = "/gphotos/config";
+  const GP_PROXY_URL = "/gphotos/fetch";
+  const GP_NIET_INGESTELD = "Google Photos-import nog niet ingesteld. Vraag Bruno om de Google-koppeling in te stellen.";
+  const gpKnoppen = Array.from(document.querySelectorAll(".gphotos-knop"));
+  const gpStatus = {
+    toevoegen: document.getElementById("gphotosStatusToevoegen"),
+    bewerken: document.getElementById("gphotosStatusBewerken")
+  };
+  let gpClientId = null;        // null = nog niet geladen, "" = niet ingesteld
+  let gpConfigBelofte = null;
+  let gpTokenClient = null;
+  let gpToken = null;           // { waarde, verloopt } — enkel in het geheugen
+  let gpTokenWachter = null;    // { resolve, reject }
+  let gpBezig = false;
+  let gpGeannuleerd = false;
+  let gpVenster = null;
+
+  function gpEscape(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function laadGpConfig() {
+    if (gpConfigBelofte) return gpConfigBelofte;
+    gpConfigBelofte = (async () => {
+      try {
+        const res = await fetch(GP_CONFIG_URL, { cache: "no-store", credentials: "same-origin" });
+        const j = res.ok ? await res.json() : null;
+        gpClientId = (j && typeof j.clientId === "string") ? j.clientId.trim() : "";
+      } catch (e) {
+        gpClientId = "";
+      }
+      if (gpClientId) laadGis();
+      return gpClientId;
+    })();
+    return gpConfigBelofte;
+  }
+
+  function laadGis() {
+    if (window.google && window.google.accounts && window.google.accounts.oauth2) return initGpTokenClient();
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true;
+    s.onload = initGpTokenClient;
+    document.head.appendChild(s);
+  }
+
+  function initGpTokenClient() {
+    if (gpTokenClient || !gpClientId || !(window.google && window.google.accounts && window.google.accounts.oauth2)) return;
+    gpTokenClient = window.google.accounts.oauth2.initTokenClient({
+      client_id: gpClientId,
+      scope: GP.SCOPE,
+      callback: (resp) => {
+        const w = gpTokenWachter; gpTokenWachter = null;
+        if (!w) return;
+        if (!resp || resp.error || !resp.access_token) {
+          w.reject(new Error("Aanmelden bij Google mislukt" + (resp && resp.error ? " (" + resp.error + ")" : "") + "."));
+          return;
+        }
+        gpToken = { waarde: resp.access_token, verloopt: Date.now() + (Number(resp.expires_in) || 3000) * 1000 - 60000 };
+        w.resolve(gpToken.waarde);
+      },
+      error_callback: (err) => {
+        const w = gpTokenWachter; gpTokenWachter = null;
+        if (!w) return;
+        const t = err && err.type;
+        w.reject(new Error(t === "popup_closed" ? "Aanmelden bij Google geannuleerd."
+          : t === "popup_failed_to_open" ? "Het Google-aanmeldvenster werd geblokkeerd. Sta pop-ups toe voor deze pagina en probeer opnieuw."
+          : "Aanmelden bij Google mislukt."));
+      }
+    });
+  }
+
+  function geldigGpToken() {
+    return gpToken && gpToken.verloopt > Date.now() ? gpToken.waarde : null;
+  }
+
+  // Moet synchroon vanuit de klik gebeuren (anders blokkeert de browser het pop-upvenster).
+  function vraagGpToken() {
+    return new Promise((resolve, reject) => {
+      gpTokenWachter = { resolve, reject };
+      gpTokenClient.requestAccessToken({ prompt: gpToken ? "" : undefined });
+    });
+  }
+
+  function zetGpBezig(bezig) {
+    gpBezig = bezig;
+    gpKnoppen.forEach((k) => { k.disabled = bezig; });
+  }
+
+  function openPicker(uri) {
+    const url = uri.replace(/\/+$/, "") + "/autoclose";
+    if (gpVenster && !gpVenster.closed) {
+      try { gpVenster.location.href = url; return true; } catch (e) {}
+    }
+    gpVenster = window.open(url, "tp-gphotos", "width=1000,height=760");
+    return !!gpVenster;
+  }
+
+  function gpKlik(doel) {
+    const statusEl = gpStatus[doel];
+    if (gpBezig) return;
+    if (!GP) { zetStatus(statusEl, "fout", "Google Photos-import kon niet laden. Herlaad de pagina."); return; }
+    if (gpClientId === null) {
+      zetStatus(statusEl, "bezig", "Even geduld…");
+      laadGpConfig().then(() => { if (!gpClientId) zetStatus(statusEl, "fout", GP_NIET_INGESTELD); else zetStatus(statusEl, "bezig", "Klaar — klik nog eens op “Importeer uit Google Photos”."); });
+      return;
+    }
+    if (!gpClientId) { zetStatus(statusEl, "fout", GP_NIET_INGESTELD); return; }
+    if (!gpTokenClient) { zetStatus(statusEl, "bezig", "Google-aanmelding wordt nog geladen… probeer zo meteen opnieuw."); return; }
+
+    zetGpBezig(true);
+    gpGeannuleerd = false;
+    let tokenBelofte;
+    const token0 = geldigGpToken();
+    if (token0) {
+      // Al aangemeld: venster meteen (in de klik) openen, straks naar Google Photos sturen.
+      gpVenster = window.open("", "tp-gphotos", "width=1000,height=760");
+      try { if (gpVenster) gpVenster.document.body.innerHTML = "<p style='font-family:sans-serif'>Google Photos wordt geopend…</p>"; } catch (e) {}
+      tokenBelofte = Promise.resolve(token0);
+    } else {
+      zetStatus(statusEl, "bezig", "Aanmelden bij Google…");
+      tokenBelofte = vraagGpToken();
+    }
+    importeerUitGoogle(doel, statusEl, tokenBelofte).finally(() => zetGpBezig(false));
+  }
+
+  async function importeerUitGoogle(doel, statusEl, tokenBelofte) {
+    let token = null;
+    let sessie = null;
+    try {
+      token = await tokenBelofte;
+      zetStatus(statusEl, "bezig", "Google Photos openen…");
+      sessie = await GP.maakSessie(fetch, token);
+      const geopend = openPicker(sessie.pickerUri);
+      zetStatus(statusEl, "bezig",
+        (geopend ? "Kies foto's in Google Photos… en klik daar op <b>Klaar</b>."
+                 : "Klik op <b>Google Photos openen</b>, kies je foto's en klik daar op <b>Klaar</b>.") +
+        '<br><a href="#" id="gpOpen_' + doel + '">Google Photos ' + (geopend ? "opnieuw " : "") + "openen</a> · " +
+        '<button type="button" class="link" id="gpStop_' + doel + '">Annuleren</button>');
+      const openLink = document.getElementById("gpOpen_" + doel);
+      if (openLink) openLink.addEventListener("click", (e) => { e.preventDefault(); openPicker(sessie.pickerUri); });
+      const stopKnop = document.getElementById("gpStop_" + doel);
+      if (stopKnop) stopKnop.addEventListener("click", () => { gpGeannuleerd = true; });
+
+      await GP.wachtOpKeuze(fetch, token, sessie, { geannuleerd: () => gpGeannuleerd });
+
+      zetStatus(statusEl, "bezig", "Gekozen foto's oplijsten…");
+      const items = await GP.lijstItems(fetch, token, sessie.id);
+      const { fotos, overgeslagen } = GP.splitsFotos(items);
+      if (!fotos.length) {
+        throw new Error(overgeslagen ? "Je koos enkel video's; die worden niet geïmporteerd (enkel foto's)." : "Er werden geen foto's gekozen.");
+      }
+      zetStatus(statusEl, "bezig", fotos.length + " foto" + (fotos.length === 1 ? "" : "'s") + " ophalen…");
+      const { bestanden, fouten } = await GP.downloadAlles(fetch, GP_PROXY_URL, token, fotos, {
+        onVoortgang: (klaar, totaal) => zetStatus(statusEl, "bezig", totaal + " foto" + (totaal === 1 ? "" : "'s") + " ophalen… (" + klaar + "/" + totaal + ")")
+      });
+      const files = bestanden.map((b) => new File([b.blob], b.naam, { type: b.type || "image/jpeg" }));
+      if (doel === "bewerken") voegBewerkBestandenToe(files); else voegBestandenToe(files);
+
+      const knopNaam = doel === "bewerken" ? "Wijzigingen opslaan" : "Galerij toevoegen";
+      let tekst = files.length + " foto" + (files.length === 1 ? "" : "'s") + " uit Google Photos toegevoegd. Klik op “" + knopNaam + "” om op te slaan.";
+      if (overgeslagen) tekst += "<br>" + overgeslagen + " video" + (overgeslagen === 1 ? "" : "'s") + " overgeslagen (enkel foto's worden geïmporteerd).";
+      if (fouten.length) tekst += "<br>" + fouten.length + " foto" + (fouten.length === 1 ? "" : "'s") + " konden niet opgehaald worden.";
+      zetStatus(statusEl, files.length ? "gelukt" : "fout", tekst);
+    } catch (err) {
+      if (err && (err.status === 401 || err.status === 403)) gpToken = null;
+      const msg = err && err.status === "geannuleerd" ? "Import geannuleerd."
+        : (err && (err.status === 401 || err.status === 403)) ? "Google-aanmelding verlopen of geweigerd. Klik opnieuw op “Importeer uit Google Photos”."
+        : (err && err.message) || "Er ging iets mis bij het importeren uit Google Photos.";
+      zetStatus(statusEl, "fout", gpEscape(msg));
+    } finally {
+      if (sessie && token) GP.verwijderSessie(fetch, token, sessie.id);
+      if (gpVenster && !gpVenster.closed && gpGeannuleerd) { try { gpVenster.close(); } catch (e) {} }
+    }
+  }
+
+  gpKnoppen.forEach((k) => k.addEventListener("click", () => gpKlik(k.dataset.doel)));
+  laadGpConfig();
 
   toonLoginStatus();
 })();

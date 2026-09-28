@@ -41,3 +41,33 @@ npx wrangler secret put BASIC_PASSWORD
 ```
 
 Daarna hard refresh / privévenster op de Worker-URL.
+
+## Google Photos-import (Fotogalerijen)
+
+Knop **Importeer uit Google Photos** op de fotogalerijen-pagina (Nieuwe galerij + Bewerken).
+Gebruikt de Google Photos **Picker API** (scope `photospicker.mediaitems.readonly`, Google Identity
+Services token-flow in de browser, geen client secret). Gekozen foto's komen in dezelfde lijst als
+lokaal gekozen foto's; de bestaande knop uploadt ze naar `images/sfeer/<map>/` en zet de galerij in
+`src/_data/sfeerbeelden-albums.json`. Video's worden overgeslagen.
+
+Worker-routes (achter dezelfde Basic Auth):
+
+- `GET /gphotos/config` → `{ "clientId": … }` uit secret `GOOGLE_CLIENT_ID` (`null` = niet ingesteld →
+  knop toont "Google Photos-import nog niet ingesteld").
+- `POST /gphotos/fetch` `{ url, token }` → haalt één foto op (Google's `baseUrl` vereist een Bearer-token
+  en geeft geen CORS-headers, dus de browser kan dat niet rechtstreeks). Enkel
+  `https://lhN.googleusercontent.com/…`; token wordt niet gelogd of bewaard.
+
+Eenmalig instellen:
+
+1. console.cloud.google.com → project → **Photos Picker API** inschakelen.
+2. OAuth-toestemmingsscherm: External, Testing, testgebruikers toevoegen, scope
+   `…/auth/photospicker.mediaitems.readonly`.
+3. OAuth-client-ID, type **Web application**, Authorized JavaScript origin:
+   `https://tpleintje-beheer.tpleintje.workers.dev`
+4. `npx wrangler secret put GOOGLE_CLIENT_ID` (plak de client-ID) → `npx wrangler deploy`.
+
+Test (zonder Google-account): `node --test test/gphotos-import.test.mjs`
+
+Let op: `public/nieuw-album-h4wknz/` is de versie die de Worker serveert; de kopie in
+`/nieuw-album-h4wknz/` (repo-root) wordt identiek gehouden.

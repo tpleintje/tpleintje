@@ -2,6 +2,7 @@ const PROTECTED_PREFIXES = [
   "/hub-df5d0dd9",
   "/nieuw-album-h4wknz",
   "/beheer-7q3k9x2m",
+  "/gphotos",
 ];
 
 function isProtected(pathname) {
@@ -116,6 +117,105 @@ function finalize(response, pathname) {
   return new HTMLRewriter().on("body", new LogoutButton(isDecap)).transform(res);
 }
 
+// ── Google Photos Picker-import (achter dezelfde Basic Auth) ──
+// GET  /gphotos/config → { clientId } uit secret GOOGLE_CLIENT_ID (null als niet ingesteld)
+// POST /gphotos/fetch  → { url, token } : haalt één foto op bij Google (baseUrl vereist
+//      een Bearer-token en Google stuurt geen CORS-headers mee). Enkel lhN.googleusercontent.com.
+//      Het token wordt alleen doorgestuurd naar Google, nooit gelogd of bewaard.
+const GPHOTOS_HOST = /^lh\d+\.googleusercontent\.com$/;
+const GPHOTOS_MAX_BYTES = 40 * 1024 * 1024;
+
+function jsonResponse(data, status = 200, extra = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: Object.assign(
+      { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+      extra,
+    ),
+  });
+}
+
+/** Geeft een URL-object terug als het een toegelaten Google Photos-afbeeldings-URL is, anders null. */
+function allowedGooglePhotosUrl(raw) {
+  if (typeof raw !== "string" || raw.length > 4096) return null;
+  let u;
+  try {
+    u = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "https:") return null;
+  if (u.username || u.password) return null;
+  if (u.port && u.port !== "443") return null;
+  if (!GPHOTOS_HOST.test(u.hostname.toLowerCase())) return null;
+  return u;
+}
+
+function gphotosConfig(env) {
+  const clientId = cleanSecret(env.GOOGLE_CLIENT_ID);
+  return jsonResponse({ clientId: clientId || null });
+}
+
+async function gphotosFetch(request, url) {
+  if (request.method !== "POST") return jsonResponse({ error: "Enkel POST." }, 405, { Allow: "POST" });
+  // JSON verplicht: een cross-site formulier kan dit niet zonder CORS-preflight (die we niet toestaan).
+  const type = request.headers.get("Content-Type") || "";
+  if (!type.toLowerCase().startsWith("application/json")) {
+    return jsonResponse({ error: "Content-Type moet application/json zijn." }, 415);
+  }
+  const origin = request.headers.get("Origin");
+  if (origin && origin !== url.origin) return jsonResponse({ error: "Verkeerde herkomst." }, 403);
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Ongeldige JSON." }, 400);
+  }
+  let target = allowedGooglePhotosUrl(body && body.url);
+  if (!target) return jsonResponse({ error: "Enkel Google Photos-afbeeldingen (https://lhN.googleusercontent.com/…) zijn toegelaten." }, 400);
+  const token = typeof (body && body.token) === "string" ? body.token.trim() : "";
+  if (!token || token.length > 4096 || /[^\x21-\x7e]/.test(token)) {
+    return jsonResponse({ error: "Google-token ontbreekt of is ongeldig." }, 400);
+  }
+
+  let upstream;
+  for (let hop = 0; hop < 4; hop++) {
+    upstream = await fetch(target.toString(), {
+      headers: { Authorization: "Bearer " + token, Accept: "image/jpeg,image/png;q=0.9,image/*;q=0.8" },
+      redirect: "manual",
+    });
+    const loc = upstream.status >= 300 && upstream.status < 400 ? upstream.headers.get("Location") : null;
+    if (!loc) break;
+    let next = null;
+    try {
+      next = allowedGooglePhotosUrl(new URL(loc, target).toString());
+    } catch {
+      next = null;
+    }
+    if (!next) return jsonResponse({ error: "Google stuurde door naar een niet-toegelaten adres." }, 502);
+    target = next;
+    upstream = null;
+  }
+  if (!upstream) return jsonResponse({ error: "Te veel doorverwijzingen." }, 502);
+  if (!upstream.ok) {
+    return jsonResponse({ error: "Google gaf een fout terug (" + upstream.status + ").", upstreamStatus: upstream.status }, 502);
+  }
+  const ctype = (upstream.headers.get("Content-Type") || "").toLowerCase();
+  if (!ctype.startsWith("image/")) return jsonResponse({ error: "Google stuurde geen afbeelding terug." }, 502);
+  const len = Number(upstream.headers.get("Content-Length") || 0);
+  if (len > GPHOTOS_MAX_BYTES) return jsonResponse({ error: "Foto is te groot." }, 413);
+
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      "Content-Type": ctype,
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -139,6 +239,12 @@ export default {
     const creds = parseBasicAuth(request.headers.get("Authorization"));
     if (!creds || !timingSafeEqual(creds.user, user) || !timingSafeEqual(creds.pass, password)) {
       return unauthorized();
+    }
+
+    if (url.pathname === "/gphotos/config") return gphotosConfig(env);
+    if (url.pathname === "/gphotos/fetch") return gphotosFetch(request, url);
+    if (url.pathname === "/gphotos" || url.pathname.startsWith("/gphotos/")) {
+      return new Response("Niet gevonden", { status: 404, headers: { "Cache-Control": "no-store" } });
     }
 
     return finalize(await env.ASSETS.fetch(request), url.pathname);
