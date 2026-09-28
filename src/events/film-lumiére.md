@@ -1,5 +1,5 @@
 ---
-titel: Film Lumiére
+titel: Film Lumiére - Amrum
 uitgelicht: false
 categorie: film
 datum: 2026-10-18
@@ -12,5 +12,6 @@ inschrijving: true
 inschrijving_binnenkort: false
 inschrijving_deadline: zo snel mogelijk - plaatsen beperkt
 plaatsen_beperkt: true
+foto: ""
 ---
 Film Lumiére - titel is momenteel nog niet gekend
