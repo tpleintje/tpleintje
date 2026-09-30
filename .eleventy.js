@@ -31,8 +31,8 @@ const { EleventyHtmlBasePlugin } = require("@11ty/eleventy");
 
 // ── Sfeerbeelden: albums = submappen van images/sfeer/, foto's = bestanden erin.
 // Nieuwe foto's uploaden = gewoon in de juiste (of een nieuwe) map droppen, geen
-// CMS-invoer per foto nodig. sfeerbeelden-albums.json bevat enkel optionele titel-
-// en bijschriftoverrides, beheerd via het CMS.
+// CMS-invoer per foto nodig. sfeerbeelden-albums.json bevat titel, creatiedatum
+// en bijschriften, beheerd via het CMS.
 const SFEER_MAP = path.join(__dirname, "images", "sfeer");
 const AFBEELDING_EXTENSIES = [".jpg", ".jpeg", ".png", ".webp"];
 
@@ -63,10 +63,11 @@ function sfeerbeeldenData() {
       .filter((f) => AFBEELDING_EXTENSIES.includes(path.extname(f).toLowerCase()))
       .sort();
 
-    const plaats = Number(meta.volgorde);
+    const ruweDatum = String(meta.datum || "").trim();
+    const datum = /^\d{4}-\d{2}-\d{2}/.test(ruweDatum) ? ruweDatum.slice(0, 10) : "";
     return {
       map: mapnaam,
-      volgorde: Number.isInteger(plaats) && plaats > 0 ? plaats : null,
+      datum,
       titel: meta.titel || hoofdletter(mapnaam.replace(/-/g, " ")),
       fotos: bestanden.map((bestand) => ({
         foto: `/images/sfeer/${mapnaam}/${bestand}`,
@@ -75,11 +76,11 @@ function sfeerbeeldenData() {
     };
   });
 
-  // Plaats 1 staat bovenaan. Zonder plaats blijft de mapnaam-volgorde.
+  // Nieuwste creatiedatum bovenaan. Zelfde dag: mapnaam. Zonder datum onderaan.
   albums.sort((a, b) => {
-    if (a.volgorde !== null && b.volgorde !== null && a.volgorde !== b.volgorde) return a.volgorde - b.volgorde;
-    if (a.volgorde !== null && b.volgorde === null) return -1;
-    if (a.volgorde === null && b.volgorde !== null) return 1;
+    if (a.datum && b.datum && a.datum !== b.datum) return a.datum < b.datum ? 1 : -1;
+    if (a.datum && !b.datum) return -1;
+    if (!a.datum && b.datum) return 1;
     if (a.map < b.map) return -1;
     if (a.map > b.map) return 1;
     return 0;

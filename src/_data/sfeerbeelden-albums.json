@@ -3,6 +3,7 @@
     {
       "map": "maandagnamiddag",
       "titel": "Maandagnamiddag",
+      "datum": "2026-07-07",
       "foto_bijschriften": [
         {
           "bestandsnaam": "maandag.jpg",
@@ -21,6 +22,7 @@
     {
       "map": "loopclub",
       "titel": "Loopclub 't Pleintje",
+      "datum": "2026-07-07",
       "foto_bijschriften": [
         {
           "bestandsnaam": "loopclub.jpg",
@@ -31,51 +33,63 @@
     {
       "map": "mooimakers",
       "titel": "Mooimakers – Zwerfvuil ruimen",
+      "datum": "2026-07-07",
       "bijschrift": "Buren ruimen samen zwerfvuil op in de buurt"
     },
     {
       "map": "nieuwjaarsdrink-2026",
-      "titel": "Nieuwjaarsdrink 2026 "
+      "titel": "Nieuwjaarsdrink 2026 ",
+      "datum": "2026-07-07"
     },
     {
       "map": "gratis-bloemen",
-      "titel": "Gratis bloemen ophalen"
+      "titel": "Gratis bloemen ophalen",
+      "datum": "2026-07-07"
     },
     {
       "map": "nieuwjaar-2023",
-      "titel": "Nieuwjaarsdrink 2023"
+      "titel": "Nieuwjaarsdrink 2023",
+      "datum": "2026-07-07"
     },
     {
       "map": "nieuwjaarsdrink-2024",
-      "titel": "Nieuwjaarsdrink 2024"
+      "titel": "Nieuwjaarsdrink 2024",
+      "datum": "2026-07-07"
     },
     {
       "map": "halloween-2025",
-      "titel": "Halloween 2025"
+      "titel": "Halloween 2025",
+      "datum": "2026-07-07"
     },
     {
       "map": "braziliaans-feest",
-      "titel": "Braziliaans feest"
+      "titel": "Braziliaans feest",
+      "datum": "2026-07-07"
     },
     {
       "map": "belletjetrack-2025",
-      "titel": "Belletjetrack 2025"
+      "titel": "Belletjetrack 2025",
+      "datum": "2026-07-07"
     },
     {
       "map": "ligo-2024",
-      "titel": "Ligo 2024"
+      "titel": "Ligo 2024",
+      "datum": "2026-07-07"
     },
     {
       "map": "klimaattafel-2023",
-      "titel": "Klimaattafel 2023"
+      "titel": "Klimaattafel 2023",
+      "datum": "2026-07-07"
     },
     {
       "map": "schilderwerken-maart-2024",
-      "titel": "Schilderwerken (maart 2024)"
+      "titel": "Schilderwerken (maart 2024)",
+      "datum": "2026-07-07"
     },
     {
       "map": "Magiek",
-      "titel": "Magisch buurtfeest 30 augustus 2026"
+      "titel": "Magisch buurtfeest 30 augustus 2026",
+      "datum": "2026-09-05"
     }
   ]
 }
