@@ -63,13 +63,26 @@ function sfeerbeeldenData() {
       .filter((f) => AFBEELDING_EXTENSIES.includes(path.extname(f).toLowerCase()))
       .sort();
 
+    const plaats = Number(meta.volgorde);
     return {
+      map: mapnaam,
+      volgorde: Number.isInteger(plaats) && plaats > 0 ? plaats : null,
       titel: meta.titel || hoofdletter(mapnaam.replace(/-/g, " ")),
       fotos: bestanden.map((bestand) => ({
         foto: `/images/sfeer/${mapnaam}/${bestand}`,
         bijschrift: bijschriftPerBestand[bestand] || meta.bijschrift || ""
       }))
     };
+  });
+
+  // Plaats 1 staat bovenaan. Zonder plaats blijft de mapnaam-volgorde.
+  albums.sort((a, b) => {
+    if (a.volgorde !== null && b.volgorde !== null && a.volgorde !== b.volgorde) return a.volgorde - b.volgorde;
+    if (a.volgorde !== null && b.volgorde === null) return -1;
+    if (a.volgorde === null && b.volgorde !== null) return 1;
+    if (a.map < b.map) return -1;
+    if (a.map > b.map) return 1;
+    return 0;
   });
 
   return { albums };
