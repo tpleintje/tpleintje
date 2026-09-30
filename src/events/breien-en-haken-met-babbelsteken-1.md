@@ -11,6 +11,7 @@ status: open
 inschrijving: false
 inschrijving_binnenkort: false
 plaatsen_beperkt: false
+foto: /images/events/clker-free-vector-images-pink-306516_1920.png
 mail_extra: ""
 ---
 Een namiddag samen gezellig handwerken
