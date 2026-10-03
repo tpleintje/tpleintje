@@ -7,7 +7,7 @@ aanvang: 20u
 locatie_naam: Lumiére
 locatie_adres: Sint-Jacobsstraat 36 8000 Brugge
 prijs: € 5 - drankje inbegrepen
-status: open
+status: volzet
 inschrijving: true
 inschrijving_binnenkort: false
 inschrijving_deadline: zo snel mogelijk - plaatsen beperkt
