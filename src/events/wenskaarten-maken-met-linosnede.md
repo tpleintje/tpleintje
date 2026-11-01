@@ -10,6 +10,7 @@ prijs: € 10
 status: open
 inschrijving: true
 inschrijving_binnenkort: false
+inschrijving_deadline: 12 december
 plaatsen_beperkt: false
 foto: /images/events/linosnede.jpg
 foto_bijschrift: een voorbeeld van een linosnede
