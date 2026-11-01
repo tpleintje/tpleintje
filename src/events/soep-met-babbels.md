@@ -2,7 +2,7 @@
 titel: soep met babbels
 uitgelicht: false
 categorie: buurtactiviteit
-datum: 2027-12-10
+datum: 2026-12-10
 aanvang: 11u
 einduur: 12u30
 locatie_naam: Buurthuis 't Pleintje, Sint-Baafsstraat
