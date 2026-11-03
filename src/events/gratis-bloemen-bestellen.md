@@ -16,6 +16,7 @@ status: open
 inschrijving: true
 inschrijving_binnenkort: false
 plaatsen_beperkt: false
+foto: /images/events/20260509_100626-2-.jpg
 ---
 Via Stad Brugge kunnen we **gratis bloemen** bestellen **voor aan de voorgevel** . Er is keuze tussen rode hanggeraniums en petunia's. De kleur van de petunia's kan niet vooraf gekozen worden. \
 Je kan maximum 10 stuks bestellen. De bloemen kunnen opgehaald worden aan het buurthuis in mei. \
