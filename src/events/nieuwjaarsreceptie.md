@@ -12,7 +12,7 @@ inschrijving_binnenkort: false
 plaatsen_beperkt: false
 foto: /images/events/img-20260126-wa0000.jpg
 ---
-Gratis wafels
+Gratis versgebakken warme wafels
 
 Dranken aan democratische prijzen
 
